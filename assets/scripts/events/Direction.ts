@@ -36,7 +36,7 @@ export class Direction {
 	}
 
 	// 根据传入的方向向量，返回对应的字符串描述
-	static getDescription(direction: Vec2) {
+	static getDirectionDesc(direction: Vec2) {
 		// 如果方向向量等于Direction.UP，则返回"UP"
 		if (direction.equals(Direction.UP)) {
 			return "UP";

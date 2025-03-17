@@ -1,5 +1,6 @@
 import {
 	_decorator,
+	CCBoolean,
 	CCFloat,
 	CCInteger,
 	Component,
@@ -18,6 +19,7 @@ import {
 const { ccclass, property } = _decorator;
 import { Direction } from "../events/Direction";
 import { Constants } from "../data/Constants";
+import { SpriteFrameUtils } from "../utils/SpriteFrameUtils";
 
 @ccclass("Tank")
 export class Tank extends Component {
@@ -37,20 +39,27 @@ export class Tank extends Component {
 	@property(Vec2)
 	direction: Vec2 = Direction.UP;
 
-	/** 精灵帧集合 */
-	_spriteFrames: Map<String, SpriteFrame> = new Map<String, SpriteFrame>();
+	/** 是否使用Ai自动移动 */
+	@property(CCBoolean)
+	useAiMove: boolean = false;
+
+	/** 上次改变方向的时间, 必须大于1000才能改变方向 */
+	_lastAiChangeDirectionTimeMillis: number = 0;
 
 	/** 被按下的按键 */
 	_keyPressed: Set<KeyCode> = new Set<KeyCode>();
 
+	/** 精灵帧集合 */
+	_spriteFrames: Map<String, SpriteFrame> = new Map<String, SpriteFrame>();
+
 	start() {
-		this.loadSpriteFrames(); // 加载精灵帧
+		this.loadSpriteFrames(0, 0); // 加载精灵帧
 		input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
 		input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
 	}
 
 	// 加载精灵帧
-	private loadSpriteFrames() {
+	private loadSpriteFrames(imgPosX: number, imgPosY: number) {
 		// 从资源中加载精灵帧
 		resources.load(
 			"images/tank_all/spriteFrame",
@@ -64,54 +73,74 @@ export class Tank extends Component {
 				// 获取精灵帧的纹理
 				var texture = spriteFrame.texture;
 				// 遍历方向数组
-				[Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT].forEach(
-					(dir, index) => {
-						// 根据纹理和索引创建精灵帧
-						var spriteFrame = this._createSpriteFrameFromTexture({
-							texture: texture,
-							x: index * Constants.TileBigSize,
-							y: 0,
-						});
-						// 将精灵帧存入精灵帧集合中
-						this._spriteFrames.set(Direction.getDescription(dir), spriteFrame);
+				var allDirs = [
+					Direction.UP,
+					Direction.DOWN,
+					Direction.LEFT,
+					Direction.RIGHT,
+				];
+				for (var index = 0; index < allDirs.length; index++) {
+					var dir = allDirs[index];
+					// 根据纹理和索引创建精灵帧
+					var spriteFrame = SpriteFrameUtils.getSpriteFrame({
+						texture: texture,
+						size: [Constants.TileBigSize, Constants.TileBigSize],
+						position: [imgPosX + index * Constants.TileBigSize, imgPosY],
+					});
+					if (index == 0) {
+						this.node.getComponent(Sprite).spriteFrame = spriteFrame;
 					}
-				);
-				// 设置节点的精灵帧为向上的精灵帧
-				this.node.getComponent(Sprite).spriteFrame = this._spriteFrames.get(
-					Direction.getDescription(Direction.UP)
-				);
+					// 将精灵帧存入精灵帧集合中
+					this._spriteFrames.set(Direction.getDirectionDesc(dir), spriteFrame);
+				}
 				this.node
 					.getComponent(UITransform)
 					.setContentSize(Constants.TileBigSize, Constants.TileBigSize);
-				// 输出加载成功的精灵帧
-				console.log("Loaded SpriteFrame:", texture);
+				console.log("Message: Loaded SpriteFrame Successfully"); // 输出加载成功的精灵帧
 			}
 		);
 	}
 
 	update(deltaTime: number) {
-		this.move(deltaTime, this.direction); // 移动人物
+		if (!this.useAiMove) {
+			this.move(deltaTime, this.direction); // 移动人物
+		} else {
+			var curTimeMillis = Date.now();
+			if (curTimeMillis - this._lastAiChangeDirectionTimeMillis > 1000) {
+				this.direction = Direction.generateRandomDirection();
+				this._lastAiChangeDirectionTimeMillis = curTimeMillis;
+			}
+			this.move(deltaTime, this.direction, true); // 移动人物
+		}
 	}
 
 	// 根据传入的时间间隔和方向，移动节点
-	move(deltaTime: number, direction: Vec2) {
+	move(deltaTime: number, direction: Vec2, isAutoMove: boolean = false) {
 		// 如果按下了W、上箭头、S、下箭头、A、左箭头、D、右箭头中的任意一个键
 		if (
-			this._keyPressed.has(KeyCode.KEY_W) ||
-			this._keyPressed.has(KeyCode.ARROW_UP) ||
-			this._keyPressed.has(KeyCode.KEY_S) ||
-			this._keyPressed.has(KeyCode.ARROW_DOWN) ||
-			this._keyPressed.has(KeyCode.KEY_A) ||
-			this._keyPressed.has(KeyCode.ARROW_LEFT) ||
-			this._keyPressed.has(KeyCode.KEY_D) ||
-			this._keyPressed.has(KeyCode.ARROW_RIGHT)
+			isAutoMove ||
+			(!isAutoMove &&
+				(this._keyPressed.has(KeyCode.KEY_W) ||
+					this._keyPressed.has(KeyCode.ARROW_UP) ||
+					this._keyPressed.has(KeyCode.KEY_S) ||
+					this._keyPressed.has(KeyCode.ARROW_DOWN) ||
+					this._keyPressed.has(KeyCode.KEY_A) ||
+					this._keyPressed.has(KeyCode.ARROW_LEFT) ||
+					this._keyPressed.has(KeyCode.KEY_D) ||
+					this._keyPressed.has(KeyCode.ARROW_RIGHT)))
 		) {
+			if (isAutoMove && direction != Direction.NONE) {
+				let sprite = this.node.getComponent(Sprite);
+				let dirDesc = Direction.getDirectionDesc(direction);
+				sprite.spriteFrame = this._spriteFrames.get(dirDesc);
+			}
 			// 将节点的位置加上速度乘以时间间隔乘以方向
+			let targetPosX =
+				this.node.position.x + this.speed * deltaTime * direction.x;
+			let targetPosY =
+				this.node.position.y + this.speed * deltaTime * direction.y;
 			this.node.setPosition(
-				new Vec3(
-					this.node.position.x + this.speed * deltaTime * direction.x,
-					this.node.position.y + this.speed * deltaTime * direction.y
-				).clampf(
+				new Vec3(targetPosX, targetPosY).clampf(
 					new Vec3(
 						-Constants.WarMapSize / 2 + Constants.TiledSize,
 						-Constants.WarMapSize / 2 + Constants.TiledSize
@@ -133,7 +162,7 @@ export class Tank extends Component {
 			this.direction = Direction.UP;
 			// 设置精灵帧为向上的精灵帧
 			this.node.getComponent(Sprite).spriteFrame = this._spriteFrames.get(
-				Direction.getDescription(Direction.UP)
+				Direction.getDirectionDesc(Direction.UP)
 			);
 			// 如果按下的键是S或向下箭头
 		} else if (
@@ -144,7 +173,7 @@ export class Tank extends Component {
 			this.direction = Direction.DOWN;
 			// 设置精灵帧为向下的精灵帧
 			this.node.getComponent(Sprite).spriteFrame = this._spriteFrames.get(
-				Direction.getDescription(Direction.DOWN)
+				Direction.getDirectionDesc(Direction.DOWN)
 			);
 			// 如果按下的键是A或向左箭头
 		} else if (
@@ -155,7 +184,7 @@ export class Tank extends Component {
 			this.direction = Direction.LEFT;
 			// 设置精灵帧为向左的精灵帧
 			this.node.getComponent(Sprite).spriteFrame = this._spriteFrames.get(
-				Direction.getDescription(Direction.LEFT)
+				Direction.getDirectionDesc(Direction.LEFT)
 			);
 			// 如果按下的键是D或向右箭头
 		} else if (
@@ -166,7 +195,7 @@ export class Tank extends Component {
 			this.direction = Direction.RIGHT;
 			// 设置精灵帧为向右的精灵帧
 			this.node.getComponent(Sprite).spriteFrame = this._spriteFrames.get(
-				Direction.getDescription(Direction.RIGHT)
+				Direction.getDirectionDesc(Direction.RIGHT)
 			);
 		}
 		this._keyPressed.add(event.keyCode); // 添加按键到集合中
@@ -188,30 +217,5 @@ export class Tank extends Component {
 			// 从按键按下集合中删除该按键
 			this._keyPressed.delete(event.keyCode);
 		}
-	}
-
-	// 根据纹理和裁剪位置创建精灵帧
-	_createSpriteFrameFromTexture({
-		texture,
-		x,
-		y,
-	}: {
-		texture: any;
-		x: number;
-		y: number;
-	}): SpriteFrame {
-		// 创建一个精灵帧
-		var spriteFrame = new SpriteFrame();
-		// 设置精灵帧的纹理
-		spriteFrame.texture = texture;
-		// 设置精灵帧的裁剪区域
-		spriteFrame.rect = new Rect(
-			x,
-			y,
-			Constants.TileBigSize,
-			Constants.TileBigSize
-		);
-		// 返回精灵帧
-		return spriteFrame;
 	}
 }
