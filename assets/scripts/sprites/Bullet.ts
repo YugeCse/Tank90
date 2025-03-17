@@ -12,11 +12,14 @@ import {
   Vec2,
   Vec3,
   PhysicsSystem,
+  UITransform,
 } from "cc";
 import { SpriteFrameUtils } from "../utils/SpriteFrameUtils";
 import { Constants } from "../data/Constants";
 import { Direction } from "../events/Direction";
 import { CollisionMask } from "../data/CollisionMask";
+import { Tiled } from "./Tiled";
+import { TiledType } from "../data/TiledType";
 const { ccclass, property } = _decorator;
 
 @ccclass("Bullet")
@@ -54,6 +57,9 @@ export class Bullet extends Component {
           ],
           size: [this.originSize, this.originSize],
         });
+        this.node
+          .getComponent(UITransform)
+          .setContentSize(this.originSize, this.originSize);
         this.node.getComponent(Sprite).spriteFrame = spriteFrame;
       }
     );
@@ -63,16 +69,22 @@ export class Bullet extends Component {
 
   onCollision(selfCollider: Collider2D, otherCollider: Collider2D) {
     if (otherCollider.group == CollisionMask.Obstacle) {
-      console.log("碰撞了墙");
       this.scheduleOnce(() => {
-        selfCollider.node.getComponent(RigidBody2D).enabledContactListener =
-          false;
-        otherCollider.node.getComponent(RigidBody2D).enabledContactListener =
-          false;
+        // selfCollider.node.getComponent(RigidBody2D).enabledContactListener =
+        //   false;
+        // otherCollider.node.getComponent(RigidBody2D).enabledContactListener =
+        //   false;
+        var tiledType = otherCollider.node.getComponent(Tiled).type;
+        var canDestroy =
+          tiledType != TiledType.grid &&
+          tiledType != TiledType.river &&
+          tiledType != TiledType.grass &&
+          tiledType != TiledType.ice;
+        console.log("碰撞了墙  是否能被销毁：", canDestroy);
         this.node.destroy();
+        if (!canDestroy) return;
         otherCollider.node.destroy();
       }, 0.1);
-      return;
     }
     console.log(
       "子弹碰撞: ",

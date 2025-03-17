@@ -809,6 +809,10 @@
     "__prefab": {
       "__id__": 39
     },
+    "tiledPrefab": {
+      "__uuid__": "216cb5ec-8603-4077-8a8e-2bc353ccf827",
+      "__expectedType__": "cc.Prefab"
+    },
     "stage": 0,
     "_id": ""
   },

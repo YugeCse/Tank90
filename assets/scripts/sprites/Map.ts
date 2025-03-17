@@ -18,6 +18,10 @@ const { ccclass, property } = _decorator;
 
 @ccclass("Map")
 export class Map extends Component {
+  /** 地砖预制体 */
+  @property({ type: Prefab, displayName: "地砖预制体" })
+  tiledPrefab: Prefab = null;
+
   /** 关卡数值 */
   @property({ type: CCInteger, displayName: "关卡数值" })
   stage: number = 0;
@@ -47,38 +51,32 @@ export class Map extends Component {
    */
   private createStageTiledMap(stageData: Array<Array<number>>) {
     if (stageData.length === 0) return;
-    resources.load(`prefabs/Tiled`, Prefab, (err, prefab: Prefab) => {
-      if (err) {
-        console.error(`Tiled 加载预制体错误：${err}`);
-        return;
-      }
-      for (let y = 0; y < stageData.length; y++) {
-        for (let x = 0; x < stageData[y].length; x++) {
-          let tiledValue = stageData[y][x];
-          if (TiledType.all.every((value) => value != tiledValue)) continue;
-          var prefabNode = instantiate(prefab);
-          const tiledNode = prefabNode.children[0].getComponent(Tiled);
-          tiledNode.setTiledType(tiledValue); //赋值地砖类型
-          tiledNode.node.setPosition(
-            new Vec3(
-              Constants.WarMapSize / 2 -
-                x * Constants.TiledSize -
-                Constants.TiledSize / 2,
-              Constants.WarMapSize / 2 -
-                y * Constants.TiledSize -
-                Constants.TiledSize / 2
-            )
+    for (let y = 0; y < stageData.length; y++) {
+      for (let x = 0; x < stageData[y].length; x++) {
+        let tiledValue = stageData[y][x];
+        if (TiledType.all.every((value) => value != tiledValue)) continue;
+        var prefabNode = instantiate(this.tiledPrefab);
+        const tiledNode = prefabNode.children[0].getComponent(Tiled);
+        tiledNode.setTiledType(tiledValue); //赋值地砖类型
+        tiledNode.node.setPosition(
+          new Vec3(
+            Constants.WarMapSize / 2 -
+              x * Constants.TiledSize -
+              Constants.TiledSize / 2,
+            Constants.WarMapSize / 2 -
+              y * Constants.TiledSize -
+              Constants.TiledSize / 2
+          )
+        );
+        tiledNode.node
+          .getComponent(UITransform)
+          .setContentSize(
+            new math.Size(Constants.TiledSize, Constants.TiledSize)
           );
-          tiledNode.node
-            .getComponent(UITransform)
-            .setContentSize(
-              new math.Size(Constants.TiledSize, Constants.TiledSize)
-            );
-          this.node.addChild(tiledNode.node); // 地砖添加到地图节点下
-          console.log(`添加地砖：${x},${y}, value:${tiledValue}`);
-        }
+        this.node.addChild(tiledNode.node); // 地砖添加到地图节点下
+        console.log(`添加地砖：${x},${y}, value:${tiledValue}`);
       }
-    });
+    }
   }
 
   update(deltaTime: number) {}
