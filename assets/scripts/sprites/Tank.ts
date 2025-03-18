@@ -5,16 +5,19 @@ import {
   CCInteger,
   Collider2D,
   Component,
+  director,
   ERaycast2DType,
   EventKeyboard,
   Input,
   input,
   instantiate,
   KeyCode,
+  macro,
   math,
   PhysicsSystem2D,
   Prefab,
   RigidBody2D,
+  Scheduler,
   Sprite,
   SpriteFrame,
   UITransform,
@@ -72,16 +75,22 @@ export class Tank extends Component {
 
   start() {
     this.loadSpriteFrames(0, 0); // 加载精灵帧
-    if (!this.useAiMove) {
+    const rigidBody = this.node.getComponent(RigidBody2D);
+    const collider = this.node.getComponent(BoxCollider2D);
+    if (this.useAiMove) {
+      rigidBody.group = CollisionMask.EnemyTank;
+      collider.group = CollisionMask.EnemyTank;
+    }
+    collider.on("begin-contact", this.onCollision, this);
+    if (this.useAiMove) {
+      Scheduler.enableForTarget(this);
+      director
+        .getScheduler()
+        .schedule(this.smartMove, this, 1, macro.REPEAT_FOREVER, 0, false);
+    } else {
       input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
       input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
     }
-    const collider = this.node.getComponent(BoxCollider2D);
-    collider.editing = true;
-    collider.on("begin-contact", this.onCollision, this);
-    if (this.useAiMove) collider.group = CollisionMask.EnemyTank;
-    const rigidBody = this.node.getComponent(RigidBody2D);
-    if (this.useAiMove) rigidBody.group = CollisionMask.EnemyTank;
   }
 
   onCollision(selfCollider: Collider2D, otherCollider: Collider2D) {}
@@ -107,15 +116,14 @@ export class Tank extends Component {
       this._spriteFrames.set(dir, spriteFrame);
       console.log("Message: Loaded SpriteFrame ", index, dir); // 输出加载成功的精灵帧
     }
-    if (this.useAiMove) {
-      this.schedule(this.smartMove, 1); //只能移动
-    }
     this.node
       .getComponent(UITransform)
       .setContentSize(Constants.TileBigSize, Constants.TileBigSize);
     this.schedule(this.useAiMove, 1);
     console.log("Message: Loaded SpriteFrame Successfully"); // 输出加载成功的精灵帧
   }
+
+  update(deltaTime: number) {}
 
   /**
    * 开火、射击
@@ -238,5 +246,9 @@ export class Tank extends Component {
       // 从按键按下集合中删除该按键
       this._keyPressed.delete(event.keyCode);
     }
+  }
+  onDestroy() {
+    if (!this.useAiMove) return;
+    director.getScheduler().unschedule(this.smartMove, this);
   }
 }
