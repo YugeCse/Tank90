@@ -25,7 +25,7 @@ export class Bullet extends Component {
 	reliantSpriteFrame: SpriteFrame = null;
 
 	@property({ type: Vec2, displayName: "子弹方向" })
-	direction: Vec2 = new Vec2(0, 0);
+	direction: Vec2 = Direction.NONE;
 
 	@property({ type: CCFloat, displayName: "子弹速度" })
 	speed: number = 100;
@@ -37,7 +37,7 @@ export class Bullet extends Component {
 		var dirs = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT];
 		var index = 0;
 		for (var i = 0; i < dirs.length; i++) {
-			if (dirs[i].equals(this.direction)) {
+			if (dirs[i] == this.direction) {
 				index = i;
 				console.log("index", index, dirs[i], this.direction);
 				break;
@@ -56,7 +56,10 @@ export class Bullet extends Component {
 		});
 		this.node
 			.getComponent(UITransform)
-			.setContentSize(this.originSize, this.originSize);
+			.setContentSize(
+				this.originSize + (index > 1 ? (index == 3 ? 1.5 : 1) : 0),
+				this.originSize + (index > 1 ? (index == 3 ? 1.5 : 1) : 0)
+			);
 		this.node.getComponent(Sprite).spriteFrame = spriteFrame;
 		const collider = this.node.getComponent(Collider2D);
 		collider.on("begin-contact", this.onCollision, this);

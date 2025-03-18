@@ -100,9 +100,10 @@ export class Tank extends Component {
 			if (index == 0) {
 				this.node.getComponent(Sprite).spriteFrame = spriteFrame;
 			}
-			console.log("Message: Loaded SpriteFrame ", index); // 输出加载成功的精灵帧
+			var dirDesc = Direction.getDirectionDesc(dir);
 			// 将精灵帧存入精灵帧集合中
-			this._spriteFrames.set(Direction.getDirectionDesc(dir), spriteFrame);
+			this._spriteFrames.set(dirDesc, spriteFrame);
+			console.log("Message: Loaded SpriteFrame ", index, dirDesc); // 输出加载成功的精灵帧
 		}
 		this.node
 			.getComponent(UITransform)
@@ -113,21 +114,24 @@ export class Tank extends Component {
 	update(deltaTime: number) {
 		if (!this.useAiMove) {
 			this.move(deltaTime, this.direction); // 移动人物
-		} else {
+		} else if (this.direction != Direction.NONE) {
 			var curTimeMillis = Date.now();
 			if (curTimeMillis - this._lastAiChangeDirectionTimeMillis > 1000) {
-				this.direction = Direction.generateRandomDirection();
+				var futureDirection = Direction.generateRandomDirection();
+				if (futureDirection == Direction.NONE) return;
+				this.direction = futureDirection;
+        this.setSpriteFrameByDirection(this.direction);
 				this._lastAiChangeDirectionTimeMillis = curTimeMillis;
 			}
+			this.move(deltaTime, this.direction, true); // 移动人物
 			if (
 				this.direction != Direction.NONE &&
 				curTimeMillis - this._lastFireTimeMillis > 1000 &&
-				math.random() < 0.5
+				math.random() < 0.3
 			) {
 				this.fire(this.direction.clone()); //50%的概率开火
 				this._lastFireTimeMillis = curTimeMillis;
 			}
-			this.move(deltaTime, this.direction, true); // 移动人物
 		}
 	}
 
@@ -175,9 +179,7 @@ export class Tank extends Component {
 					this._keyPressed.has(KeyCode.ARROW_RIGHT)))
 		) {
 			if (isAutoMove && direction != Direction.NONE) {
-				let sprite = this.node.getComponent(Sprite);
-				let dirDesc = Direction.getDirectionDesc(direction);
-				sprite.spriteFrame = this._spriteFrames.get(dirDesc);
+				this.setSpriteFrameByDirection(direction);
 			}
 			// 将节点的位置加上速度乘以时间间隔乘以方向
 			let targetPosX =
@@ -202,6 +204,13 @@ export class Tank extends Component {
 			); // 将节点的位置限制在地图范围内
 		}
 	}
+
+  /** 根据方向修改要展示的图片帧 */
+  private setSpriteFrameByDirection(direction: math.Vec2) {
+    let sprite = this.node.getComponent(Sprite);
+    let dirDesc = Direction.getDirectionDesc(direction);
+    sprite.spriteFrame = this._spriteFrames.get(dirDesc);
+  }
 
 	findRouteByRaycast(target: Vec2): Boolean {
 		var raycastResult = PhysicsSystem2D.instance.raycast(
