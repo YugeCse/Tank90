@@ -4,15 +4,12 @@ import {
   CCFloat,
   Collider2D,
   Component,
-  Node,
-  resources,
   RigidBody2D,
   Sprite,
   SpriteFrame,
   Vec2,
-  Vec3,
-  PhysicsSystem,
   UITransform,
+  Vec3,
 } from "cc";
 import { SpriteFrameUtils } from "../utils/SpriteFrameUtils";
 import { Constants } from "../data/Constants";
@@ -24,6 +21,9 @@ const { ccclass, property } = _decorator;
 
 @ccclass("Bullet")
 export class Bullet extends Component {
+  @property({ type: SpriteFrame, displayName: "关联图片" })
+  reliantSpriteFrame: SpriteFrame = null;
+
   @property({ type: Vec2, displayName: "子弹方向" })
   direction: Vec2 = new Vec2(0, 0);
 
@@ -34,35 +34,20 @@ export class Bullet extends Component {
   originSize: number = 6;
 
   start() {
-    resources.load(
-      "images/tank_all/spriteFrame",
-      SpriteFrame,
-      (err, spriteFrame) => {
-        if (err) {
-          console.log("加载子弹图片失败: ", err);
-          return;
-        }
-        var dirs = [
-          Direction.UP,
-          Direction.DOWN,
-          Direction.LEFT,
-          Direction.RIGHT,
-        ];
-        var index = dirs.indexOf(this.direction);
-        SpriteFrameUtils.getSpriteFrame({
-          texture: spriteFrame.texture,
-          position: [
-            Constants.WarBulletImagePosition.x + index * this.originSize,
-            Constants.WarBulletImagePosition.y,
-          ],
-          size: [this.originSize, this.originSize],
-        });
-        this.node
-          .getComponent(UITransform)
-          .setContentSize(this.originSize, this.originSize);
-        this.node.getComponent(Sprite).spriteFrame = spriteFrame;
-      }
-    );
+    var dirs = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT];
+    var index = dirs.indexOf(this.direction);
+    var spriteFrame = SpriteFrameUtils.getSpriteFrame({
+      texture: this.reliantSpriteFrame.texture,
+      position: [
+        Constants.WarBulletImagePosition.x + index * this.originSize,
+        Constants.WarBulletImagePosition.y,
+      ],
+      size: [this.originSize, this.originSize],
+    });
+    this.node
+      .getComponent(UITransform)
+      .setContentSize(this.originSize, this.originSize);
+    this.node.getComponent(Sprite).spriteFrame = spriteFrame;
     const collider = this.node.getComponent(Collider2D);
     collider.on("begin-contact", this.onCollision, this);
   }
@@ -74,7 +59,7 @@ export class Bullet extends Component {
         //   false;
         // otherCollider.node.getComponent(RigidBody2D).enabledContactListener =
         //   false;
-        var tiledType = otherCollider.node.getComponent(Tiled).type;
+        var tiledType = otherCollider.node.getComponent(Tiled).tiledType;
         var canDestroy =
           tiledType != TiledType.grid &&
           tiledType != TiledType.river &&
@@ -103,6 +88,10 @@ export class Bullet extends Component {
       this.node.destroy();
       return;
     }
+    // const rigidBody = this.node.getComponent(RigidBody2D);
+    // rigidBody.linearVelocity = this.direction.multiplyScalar(
+    //   this.speed * deltaTime
+    // );
     this.node.setPosition(
       new Vec3(
         this.node.position.x + this.direction.x * this.speed * deltaTime,

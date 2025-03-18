@@ -268,6 +268,10 @@
     "__prefab": {
       "__id__": 12
     },
+    "reliantSpriteFrame": {
+      "__uuid__": "cd86c4aa-67e4-4609-a851-e04ed95d82a0@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
     "bulletPrefab": {
       "__uuid__": "995811f4-b39b-4945-93fc-3f2860f0ca89",
       "__expectedType__": "cc.Prefab"

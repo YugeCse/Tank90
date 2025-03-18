@@ -1,24 +1,20 @@
 import {
   _decorator,
   BoxCollider2D,
-  CCBoolean,
   CCFloat,
   CCInteger,
-  Collider,
   Collider2D,
   Component,
+  ERaycast2DType,
   EventKeyboard,
-  ICollisionEvent,
   Input,
   input,
   instantiate,
-  IPhysics2DContact,
-  ITriggerEvent,
   KeyCode,
   math,
+  PhysicsSystem2D,
   Prefab,
-  Rect,
-  resources,
+  RigidBody2D,
   Sprite,
   SpriteFrame,
   UITransform,
@@ -30,9 +26,15 @@ import { Direction } from "../events/Direction";
 import { Constants } from "../data/Constants";
 import { SpriteFrameUtils } from "../utils/SpriteFrameUtils";
 import { Bullet } from "./Bullet";
+import { CollisionMask } from "../data/CollisionMask";
 
+/** 坦克精灵 */
 @ccclass("Tank")
 export class Tank extends Component {
+  @property({ type: SpriteFrame, displayName: "关联图片" })
+  reliantSpriteFrame: SpriteFrame = null;
+
+  /** 子弹预制体 */
   @property({ type: Prefab, displayName: "子弹预制体" })
   bulletPrefab: Prefab = null;
 
@@ -56,6 +58,7 @@ export class Tank extends Component {
   @property({ displayName: "AI自动移动" })
   useAiMove: boolean = false;
 
+  /** 上次开火的时间 */
   private _lastFireTimeMillis: number = 0;
 
   /** 上次改变方向的时间, 必须大于1000才能改变方向 */
@@ -65,10 +68,7 @@ export class Tank extends Component {
   private _keyPressed: Set<KeyCode> = new Set<KeyCode>();
 
   /** 精灵帧集合 */
-  private _spriteFrames: Map<String, SpriteFrame> = new Map<
-    String,
-    SpriteFrame
-  >();
+  private _spriteFrames: Map<String, SpriteFrame> = new Map();
 
   start() {
     this.loadSpriteFrames(0, 0); // 加载精灵帧
@@ -76,52 +76,38 @@ export class Tank extends Component {
     input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
     const collider = this.node.getComponent(BoxCollider2D);
     collider.on("begin-contact", this.onCollision, this);
+    if (this.useAiMove) collider.group = CollisionMask.EnemyTank;
+    const rigidBody = this.node.getComponent(RigidBody2D);
+    if (this.useAiMove) rigidBody.group = CollisionMask.EnemyTank;
   }
 
   onCollision(selfCollider: Collider2D, otherCollider: Collider2D) {}
 
   // 加载精灵帧
   private loadSpriteFrames(imgPosX: number, imgPosY: number) {
-    // 从资源中加载精灵帧
-    resources.load(
-      "images/tank_all/spriteFrame",
-      SpriteFrame,
-      (err, spriteFrame) => {
-        // 如果加载失败，则输出错误信息
-        if (err) {
-          console.error("Failed to load SpriteFrame:", err);
-          return;
-        }
-        // 获取精灵帧的纹理
-        var texture = spriteFrame.texture;
-        // 遍历方向数组
-        var allDirs = [
-          Direction.UP,
-          Direction.DOWN,
-          Direction.LEFT,
-          Direction.RIGHT,
-        ];
-        for (var index = 0; index < allDirs.length; index++) {
-          var dir = allDirs[index];
-          // 根据纹理和索引创建精灵帧
-          var spriteFrame = SpriteFrameUtils.getSpriteFrame({
-            texture: texture,
-            size: [Constants.TileBigSize, Constants.TileBigSize],
-            position: [imgPosX + index * Constants.TileBigSize, imgPosY],
-          });
-          if (index == 0) {
-            this.node.getComponent(Sprite).spriteFrame = spriteFrame;
-          }
-          console.log("Message: Loaded SpriteFrame ", index); // 输出加载成功的精灵帧
-          // 将精灵帧存入精灵帧集合中
-          this._spriteFrames.set(Direction.getDirectionDesc(dir), spriteFrame);
-        }
-        this.node
-          .getComponent(UITransform)
-          .setContentSize(Constants.TileBigSize, Constants.TileBigSize);
-        console.log("Message: Loaded SpriteFrame Successfully"); // 输出加载成功的精灵帧
+    // 遍历方向数组
+    var dirs = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT];
+    // 获取精灵帧的纹理
+    var texture = this.reliantSpriteFrame.texture;
+    for (var index = 0; index < dirs.length; index++) {
+      var dir = dirs[index];
+      // 根据纹理和索引创建精灵帧
+      var spriteFrame = SpriteFrameUtils.getSpriteFrame({
+        texture: texture,
+        size: [Constants.TileBigSize, Constants.TileBigSize],
+        position: [imgPosX + index * Constants.TileBigSize, imgPosY],
+      });
+      if (index == 0) {
+        this.node.getComponent(Sprite).spriteFrame = spriteFrame;
       }
-    );
+      console.log("Message: Loaded SpriteFrame ", index); // 输出加载成功的精灵帧
+      // 将精灵帧存入精灵帧集合中
+      this._spriteFrames.set(Direction.getDirectionDesc(dir), spriteFrame);
+    }
+    this.node
+      .getComponent(UITransform)
+      .setContentSize(Constants.TileBigSize, Constants.TileBigSize);
+    console.log("Message: Loaded SpriteFrame Successfully"); // 输出加载成功的精灵帧
   }
 
   update(deltaTime: number) {
@@ -164,7 +150,13 @@ export class Tank extends Component {
     rootNode.setPosition(this.node.position.clone().add(deltaPosition));
     var bulletNode = rootNode.children[0].getComponent(Bullet);
     bulletNode.direction = direction.clone();
-    this.node.parent.addChild(rootNode);
+    if (this.useAiMove) {
+      rootNode.children[0].getComponent(BoxCollider2D).group =
+        CollisionMask.EnemyBullet;
+      rootNode.children[0].getComponent(RigidBody2D).group =
+        CollisionMask.EnemyBullet;
+    }
+    this.node.parent.addChild(rootNode); //子弹追加到界面中
   }
 
   // 根据传入的时间间隔和方向，移动节点
@@ -192,19 +184,43 @@ export class Tank extends Component {
         this.node.position.x + this.speed * deltaTime * direction.x;
       let targetPosY =
         this.node.position.y + this.speed * deltaTime * direction.y;
+      // var targetPos = new Vec2(targetPosX, targetPosY);
+      // targetPos = this.findRouteByRaycast(direction, targetPos);
       this.node.setPosition(
-        new Vec3(targetPosX, targetPosY).clampf(
-          new Vec3(
-            -Constants.WarMapSize / 2 + Constants.TiledSize,
-            -Constants.WarMapSize / 2 + Constants.TiledSize
-          ),
-          new Vec3(
-            Constants.WarMapSize / 2 - Constants.TiledSize,
-            Constants.WarMapSize / 2 - Constants.TiledSize
+        new Vec2(targetPosX, targetPosY)
+          .toVec3()
+          .clampf(
+            new Vec3(
+              -Constants.WarMapSize / 2 + Constants.TiledSize,
+              -Constants.WarMapSize / 2 + Constants.TiledSize
+            ),
+            new Vec3(
+              Constants.WarMapSize / 2 - Constants.TiledSize,
+              Constants.WarMapSize / 2 - Constants.TiledSize
+            )
           )
-        )
       ); // 将节点的位置限制在地图范围内
     }
+  }
+
+  findRouteByRaycast(direction: Vec2, target: Vec2): Vec2 {
+    if (direction == Direction.NONE) return direction;
+    var raycastResult = PhysicsSystem2D.instance.raycast(
+      this.node.position,
+      target,
+      ERaycast2DType.All
+    );
+    if (raycastResult.length > 0) {
+      for (let i = 0; i < raycastResult.length; i++) {
+        if (raycastResult[i].point) {
+          return this.node.position
+            .clone()
+            .add(raycastResult[i].point.toVec3())
+            .toVec2();
+        }
+      }
+    }
+    return target;
   }
 
   // 当键盘按下时触发
