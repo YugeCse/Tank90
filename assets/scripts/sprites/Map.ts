@@ -1,6 +1,7 @@
 import {
   _decorator,
   CCInteger,
+  Collider2D,
   Component,
   Graphics,
   instantiate,
@@ -58,6 +59,9 @@ export class Map extends Component {
         var prefabNode = instantiate(this.tiledPrefab);
         const tiledNode = prefabNode.getComponent(Tiled);
         tiledNode.setTiledType(tiledValue); //赋值地砖类型
+        if (tiledValue == TiledType.ice || tiledValue == TiledType.grass) {
+          tiledNode.node.getComponent(Collider2D).enabled = false; //冰块和草地不设置碰撞
+        }
         tiledNode.node.setPosition(
           new Vec3(
             x * Constants.TiledSize -
