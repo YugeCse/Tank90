@@ -56,16 +56,16 @@ export class Map extends Component {
         let tiledValue = stageData[y][x];
         if (TiledType.all.every((value) => value != tiledValue)) continue;
         var prefabNode = instantiate(this.tiledPrefab);
-        const tiledNode = prefabNode.children[0].getComponent(Tiled);
+        const tiledNode = prefabNode.getComponent(Tiled);
         tiledNode.setTiledType(tiledValue); //赋值地砖类型
         tiledNode.node.setPosition(
           new Vec3(
-            Constants.WarMapSize / 2 -
-              x * Constants.TiledSize -
-              Constants.TiledSize / 2,
-            Constants.WarMapSize / 2 -
+            x * Constants.TiledSize -
+              Constants.WarMapSize / 2.0 +
+              Constants.TiledSize / 2.0,
+            Constants.WarMapSize / 2.0 -
               y * Constants.TiledSize -
-              Constants.TiledSize / 2
+              Constants.TiledSize / 2.0
           )
         );
         tiledNode.node

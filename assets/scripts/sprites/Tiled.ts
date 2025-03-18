@@ -1,10 +1,7 @@
 import {
   _decorator,
-  BoxCollider2D,
   CCInteger,
-  Collider2D,
   Component,
-  resources,
   RigidBody2D,
   Sprite,
   SpriteFrame,

@@ -1,5 +1,8 @@
 /** 碰撞掩码声明 */
 export class CollisionMask {
+  /** 地图边界掩码值 */
+  public static readonly WorldBoundary: number = 1 << 0;
+
   /** 障碍物掩码值 */
   public static readonly Obstacle: number = 1 << 1;
 

@@ -1,60 +1,41 @@
-import { _decorator, Component, Node, Vec2 } from "cc";
-const { ccclass, property } = _decorator;
+import { _decorator, math, Vec2 } from "cc";
 
-// 定义一个Direction类，用于表示方向
-export class Direction {
-	/** 向上方向 */
-	static readonly UP = new Vec2(0, -1);
+export type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT" | "NONE";
 
-	/** 向下方向 */
-	static readonly DOWN = new Vec2(0, 1);
+/** 定义一个Direction类，用于表示方向 */
+export namespace DirectionUtils {
+  export function generateRandomDirection(): Direction {
+    var value = math.randomRangeInt(0, 5);
+    switch (value) {
+      case 0:
+        return "UP";
+      case 1:
+        return "DOWN";
+      case 2:
+        return "LEFT";
+      case 3:
+        return "RIGHT";
+      default:
+        return "NONE";
+    }
+  }
 
-	/** 向左方向 */
-	static readonly LEFT = new Vec2(-1, 0);
+  export function getDirectionNormalize(direction: Direction) {
+    switch (direction) {
+      case "UP":
+        return new Vec2(0, 1);
+      case "DOWN":
+        return new Vec2(0, -1);
+      case "LEFT":
+        return new Vec2(-1, 0);
+      case "RIGHT":
+        return new Vec2(1, 0);
+      default:
+        return new Vec2(0, 0);
+    }
+  }
 
-	/** 向右方向 */
-	static readonly RIGHT = new Vec2(1, 0);
-
-	/** 无方向 */
-	static readonly NONE = new Vec2(0, 0);
-
-	/** 所有方向数组 */
-	static readonly VALUES = [
-		Direction.UP,
-		Direction.DOWN,
-		Direction.LEFT,
-		Direction.RIGHT,
-		Direction.NONE,
-	];
-
-	/** 生成一个随机方向 */
-	static generateRandomDirection() {
-		// 从Direction.VALUES数组中随机选择一个方向
-		return Direction.VALUES[
-			Math.floor(Math.random() * Direction.VALUES.length)
-		];
-	}
-
-	/** 根据传入的方向向量，返回对应的字符串描述 */
-	static getDirectionDesc(direction: Vec2) {
-		// 如果方向向量等于Direction.UP，则返回"UP"
-		if (direction == Direction.UP) {
-			return "UP";
-			// 如果方向向量等于Direction.DOWN，则返回"DOWN"
-		} else if (direction == Direction.DOWN) {
-			return "DOWN";
-			// 如果方向向量等于Direction.LEFT，则返回"LEFT"
-		} else if (direction == Direction.LEFT) {
-			return "LEFT";
-			// 如果方向向量等于Direction.RIGHT，则返回"RIGHT"
-		} else if (direction == Direction.RIGHT) {
-			return "RIGHT";
-			// 如果方向向量等于Direction.NONE，则返回"NONE"
-		} else if (direction == Direction.NONE) {
-			return "NONE";
-			// 否则返回"UNKNOWN"
-		} else {
-			return "UNKNOWN";
-		}
-	}
+  export function getValuesWithoutNone(): Array<Direction> {
+    return ["UP", "DOWN", "LEFT", "RIGHT"];
+  }
 }
