@@ -23,5 +23,5 @@ export class Constants {
   public static readonly WarMapTiledImagePosition = new Vec2(0, 96);
 
   /** 战场子弹图片起始位置： */
-  public static readonly WarBulletImagePosition = new Vec2(80, 96);
+  public static readonly WarBulletImagePosition = new Vec2(80.5, 96);
 }

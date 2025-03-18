@@ -4,10 +4,10 @@ const { ccclass, property } = _decorator;
 // 定义一个Direction类，用于表示方向
 export class Direction {
 	// 向上方向
-	static readonly UP = new Vec2(0, 1);
+	static readonly UP = new Vec2(0, -1);
 
 	// 向下方向
-	static readonly DOWN = new Vec2(0, -1);
+	static readonly DOWN = new Vec2(0, 1);
 
 	// 向左方向
 	static readonly LEFT = new Vec2(-1, 0);
