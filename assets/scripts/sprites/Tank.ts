@@ -184,21 +184,7 @@ export class Tank extends Component {
 			return;
 		}
 		if (direction == "NONE") return; // 如果方向为NONE，则不发射子弹
-		var rootNode = instantiate(this.bulletPrefab);
-		var directionVec2 = DirectionUtils.getNormailized(direction);
-		var tankSize = this.node.getComponent(UITransform).contentSize;
-		var deltaPosition = new Vec3(
-			(directionVec2.x * tankSize.width) / 2,
-			(directionVec2.y * tankSize.height) / 2
-		);
-		rootNode.setPosition(this.node.position.clone().add(deltaPosition));
-		var bulletNode = rootNode.getComponent(Bullet);
-		bulletNode.direction = direction;
-		if (this.useAiMove) {
-			rootNode.getComponent(BoxCollider2D).group = CollisionMask.EnemyBullet;
-			rootNode.getComponent(RigidBody2D).group = CollisionMask.EnemyBullet;
-		}
-		this.node.parent.addChild(rootNode); //子弹追加到界面中
+		this.node.parent.addChild(Bullet.create(this.bulletPrefab, this.node)); //子弹追加到界面中
 	}
 
 	/** 设置精灵的线性速度 */
@@ -303,7 +289,7 @@ export class Tank extends Component {
 	 * @param speed 坦克速度
 	 * @param bornPosition 出生位置
 	 */
-	public static create(options: TankCreationOptions): Node {
+	public static create(options: TankCreationInitialOptions): Node {
 		var tankNode = instantiate(options.prefab);
 		var tank = tankNode.getComponent(Tank);
 		tank.speed = options.speed ?? 3; //设置坦克速度
@@ -314,7 +300,10 @@ export class Tank extends Component {
 	}
 }
 
-export class TankCreationOptions {
+/**
+ * 坦克创建选项
+ */
+export class TankCreationInitialOptions {
 	prefab: Prefab;
 	useAiMove?: boolean = false;
 	tankType?: number = Tank.TYPE_HERO_TANK;

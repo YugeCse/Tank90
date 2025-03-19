@@ -4,11 +4,15 @@ import {
 	CCFloat,
 	Collider2D,
 	Component,
+	instantiate,
+	Node,
+	Prefab,
 	RigidBody2D,
 	Sprite,
 	SpriteFrame,
 	UITransform,
 	Vec2,
+	Vec3,
 } from "cc";
 import { SpriteFrameUtils } from "../utils/SpriteFrameUtils";
 import { Constants } from "../data/Constants";
@@ -16,6 +20,7 @@ import { Direction, DirectionUtils } from "../data/Direction";
 import { CollisionMask } from "../data/CollisionMask";
 import { Tiled } from "./Tiled";
 import { TiledType } from "../data/TiledType";
+import { Tank } from "./Tank";
 const { ccclass, property } = _decorator;
 
 @ccclass("Bullet")
@@ -165,5 +170,30 @@ export class Bullet extends Component {
 		this.scheduleOnce(() => {
 			if (this.node) this.node.destroy(); //销毁子弹
 		}, 0.15);
+	}
+
+	/**
+	 * 创建子弹组件
+	 * @param prefab 子弹预制体
+	 * @param tankAnchor 发射子弹的坦克节点
+	 */
+	public static create(prefab: Prefab, tankAnchor: Node) {
+		var rootNode = instantiate(prefab);
+		var tank = tankAnchor.getComponent(Tank);
+		var tankDirection = tank.direction;
+		var directionVec2 = DirectionUtils.getNormailized(tankDirection);
+		var tankSize = tank.node.getComponent(UITransform).contentSize;
+		var deltaPosition = new Vec3(
+			(directionVec2.x * tankSize.width) / 2,
+			(directionVec2.y * tankSize.height) / 2
+		);
+		rootNode.setPosition(tank.node.position.clone().add(deltaPosition));
+		var bulletNode = rootNode.getComponent(Bullet);
+		bulletNode.direction = tankDirection;
+		if (tank.useAiMove) {
+			rootNode.getComponent(BoxCollider2D).group = CollisionMask.EnemyBullet;
+			rootNode.getComponent(RigidBody2D).group = CollisionMask.EnemyBullet;
+		}
+		return rootNode;
 	}
 }
