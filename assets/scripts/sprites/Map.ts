@@ -35,17 +35,19 @@ export class Map extends Component {
 	private _stageData: Array<Array<number>> = [];
 
 	start() {
-		this.node
-			.getComponent(UITransform)
-			.setContentSize(Constants.WarMapSize, Constants.WarMapSize);
 		const graphics = this.node.getComponent(Graphics);
+		var worldPosX = -Constants.WarMapSize / 2;
+		var worldPosY = -Constants.WarMapSize / 2;
 		graphics.color = Constants.WarMapBackgroundColor;
 		graphics.fillRect(
-			-Constants.WarMapSize / 2,
-			-Constants.WarMapSize / 2,
+			worldPosX,
+			worldPosY,
 			Constants.WarMapSize,
 			Constants.WarMapSize
 		);
+		this.node
+			.getComponent(UITransform)
+			.setContentSize(Constants.WarMapSize, Constants.WarMapSize);
 		this._stageData = StageMaps.all[this.stage];
 		this.createStageTiledMap(this._stageData); //创建关卡地砖
 		this.createHeroTank(); //创建英雄坦克
@@ -100,12 +102,13 @@ export class Map extends Component {
 
 	update(deltaTime: number) {}
 
+	/** 创建英雄坦克对象 */
 	createHeroTank() {
-		var tankNode = instantiate(this.tankPrefab);
-		tankNode.setSiblingIndex(1); //英雄坦克放在最上层
-		tankNode.setPosition(new Vec3(0, 0, 0));
-		tankNode.getComponent(Tank).useAiMove = true;
-		tankNode.getComponent(Tank).speed = 3; //设置坦克速度
+		var tankNode = Tank.create({
+			useAiMove: true,
+			prefab: this.tankPrefab,
+			tankType: Tank.TYPE_ENEMY3_TANK,
+		});
 		this.node.addChild(tankNode); // 地砖添加到地图节点下
 	}
 }
