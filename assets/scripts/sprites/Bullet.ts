@@ -72,28 +72,68 @@ export class Bullet extends Component {
 		if (otherCollider.group == CollisionMask.WorldBoundary) {
 			selfCollider.enabled = false; // 碰撞到边界，就停止碰撞检测
 			this.bombThenDestroy();
-		} else if (otherCollider.group == CollisionMask.Obstacle) {
-			var otherNode = otherCollider.node;
-			if (!otherNode) return;
-			var tiledType = otherNode.getComponent(Tiled).tiledType;
-			var canDestroy =
-				tiledType != TiledType.grid &&
-				tiledType != TiledType.river &&
-				tiledType != TiledType.grass &&
-				tiledType != TiledType.ice;
-			console.log("碰撞了墙  是否能被销毁：", canDestroy);
+		} else if (
+			otherCollider.group == CollisionMask.EnemyBullet ||
+			otherCollider.group == CollisionMask.HeroBullet
+		) {
 			selfCollider.enabled = false;
-			if (canDestroy) otherCollider.enabled = false;
+			otherCollider.enabled = false;
 			this.scheduleOnce(() => {
 				if (this.node) this.bombThenDestroy();
-				if (canDestroy && otherNode) otherNode.destroy();
+				if (otherCollider.node)
+					otherCollider.node.getComponent(Bullet).bombThenDestroy();
 			});
+		} else if (otherCollider.group == CollisionMask.EnemyTank) {
+			this.handleCollisionWithEnemyTank(selfCollider, otherCollider);
+		} else if (otherCollider.group == CollisionMask.HeroTank) {
+			this.handleCollisionWithHeroTank(selfCollider, otherCollider);
+		} else if (otherCollider.group == CollisionMask.Obstacle) {
+			this.handleCollisionWithObstacles(selfCollider, otherCollider);
 		}
-		console.log(
-			"子弹碰撞: ",
-			selfCollider.node.getComponent(BoxCollider2D).group,
-			otherCollider.node.getComponent(BoxCollider2D).group
-		);
+	}
+
+	/** 与敌方坦克发生碰撞 */
+	private handleCollisionWithEnemyTank(
+		selfCollider: Collider2D,
+		otherCollider: Collider2D
+	) {
+		selfCollider.enabled = false;
+		this.scheduleOnce(() => {
+			if (this.node) this.bombThenDestroy();
+		});
+	}
+
+	/** 与英雄坦克发生碰撞 */
+	private handleCollisionWithHeroTank(
+		selfCollider: Collider2D,
+		otherCollider: Collider2D
+	) {
+		selfCollider.enabled = false;
+		this.scheduleOnce(() => {
+			if (this.node) this.bombThenDestroy();
+		});
+	}
+
+	/** 处理与障碍物发生碰撞的逻辑 */
+	private handleCollisionWithObstacles(
+		selfCollider: Collider2D,
+		otherCollider: Collider2D
+	) {
+		var otherNode = otherCollider.node;
+		if (!otherNode) return; // 如果没有节点，就返回
+		var tiledType = otherNode.getComponent(Tiled).tiledType;
+		var canDestroy =
+			tiledType != TiledType.grid &&
+			tiledType != TiledType.river &&
+			tiledType != TiledType.grass &&
+			tiledType != TiledType.ice;
+		console.log("碰撞了墙  是否能被销毁：", canDestroy);
+		selfCollider.enabled = false;
+		if (canDestroy) otherCollider.enabled = false;
+		this.scheduleOnce(() => {
+			if (this.node) this.bombThenDestroy();
+			if (canDestroy && otherNode) otherNode.destroy();
+		});
 	}
 
 	update(deltaTime: number) {

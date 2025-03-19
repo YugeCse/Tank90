@@ -151,7 +151,6 @@ export class Tank extends Component {
 		this.node
 			.getComponent(UITransform)
 			.setContentSize(Constants.TileBigSize, Constants.TileBigSize);
-		this.schedule(this.useAiMove, 1);
 		console.log("Message: Loaded SpriteFrame Successfully"); // 输出加载成功的精灵帧
 	}
 
@@ -167,7 +166,9 @@ export class Tank extends Component {
 			math.random() < 0.3 &&
 			curTimeMillis - this._lastFireTimeMillis > timeSpan
 		) {
-			this.shoot(this.direction);
+			if (this.direction != "NONE") {
+				this.shoot(this.direction);
+			}
 			this._lastFireTimeMillis = curTimeMillis;
 		}
 	}
@@ -176,7 +177,7 @@ export class Tank extends Component {
 	 * 开火、射击
 	 * @param direction 射击方向
 	 */
-	shoot(direction: Direction) {
+	private shoot(direction: Direction) {
 		console.log("fire");
 		if (this.bulletPrefab == null) {
 			console.log("错误：子弹预制体为NULL");
@@ -209,7 +210,7 @@ export class Tank extends Component {
 	}
 
 	/** 智能移动 */
-	smartMove() {
+	private smartMove() {
 		var futureDirection = DirectionUtils.generateRandomDirection();
 		if (futureDirection != "NONE") {
 			this.direction = futureDirection;
@@ -219,7 +220,7 @@ export class Tank extends Component {
 	}
 
 	/** 玩家移动 */
-	playerMove(direction: Direction) {
+	private playerMove(direction: Direction) {
 		this.direction = direction;
 		this.node.getComponent(Sprite).spriteFrame =
 			this._spriteFrames.get(direction);
