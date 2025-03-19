@@ -123,7 +123,17 @@ export class Tank extends Component {
     console.log("Message: Loaded SpriteFrame Successfully"); // 输出加载成功的精灵帧
   }
 
-  update(deltaTime: number) {}
+  update(deltaTime: number) {
+    var curTimeMillis = Date.now();
+    if (
+      this.direction != "NONE" &&
+      math.random() < 0.3 &&
+      curTimeMillis - this._lastFireTimeMillis > 1000
+    ) {
+      this.shoot(this.direction);
+      this._lastFireTimeMillis = curTimeMillis;
+    }
+  }
 
   /**
    * 开火、射击
@@ -145,6 +155,7 @@ export class Tank extends Component {
     rootNode.setPosition(this.node.position.clone().add(deltaPosition));
     var bulletNode = rootNode.getComponent(Bullet);
     bulletNode.direction = direction;
+    if (direction == "NONE") return; // 如果方向为NONE，则不发射子弹
     if (this.useAiMove) {
       rootNode.getComponent(BoxCollider2D).group = CollisionMask.EnemyBullet;
       rootNode.getComponent(RigidBody2D).group = CollisionMask.EnemyBullet;
@@ -160,15 +171,6 @@ export class Tank extends Component {
   }
 
   smartMove() {
-    var curTimeMillis = Date.now();
-    if (
-      this.direction != "NONE" &&
-      math.random() < 0.3 &&
-      curTimeMillis - this._lastFireTimeMillis > 1000
-    ) {
-      this.shoot(this.direction);
-      this._lastFireTimeMillis = curTimeMillis;
-    }
     var futureDirection = DirectionUtils.generateRandomDirection();
     if (futureDirection != "NONE") {
       this.direction = futureDirection;

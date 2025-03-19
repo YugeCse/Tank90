@@ -2,12 +2,14 @@ import {
   _decorator,
   CCInteger,
   Collider2D,
+  Color,
   Component,
   Graphics,
   instantiate,
   math,
   Prefab,
   resources,
+  Sprite,
   UITransform,
   Vec3,
 } from "cc";
@@ -15,6 +17,7 @@ import { Constants } from "../data/Constants";
 import { StageMaps } from "../data/StageMaps";
 import { TiledType } from "../data/TiledType";
 import { Tiled } from "./Tiled";
+import { Tank } from "./Tank";
 const { ccclass, property } = _decorator;
 
 @ccclass("Map")
@@ -22,6 +25,10 @@ export class Map extends Component {
   /** 地砖预制体 */
   @property({ type: Prefab, displayName: "地砖预制体" })
   tiledPrefab: Prefab = null;
+
+  /** 坦克预制体 */
+  @property({ type: Prefab, displayName: "坦克预制体" })
+  tankPrefab: Prefab = null;
 
   /** 关卡数值 */
   @property({ type: CCInteger, displayName: "关卡数值" })
@@ -44,6 +51,7 @@ export class Map extends Component {
     );
     this._stageData = StageMaps.all[this.stage];
     this.createStageTiledMap(this._stageData); //创建关卡地砖
+    this.createHeroTank(); //创建英雄坦克
   }
 
   /**
@@ -59,6 +67,9 @@ export class Map extends Component {
         var prefabNode = instantiate(this.tiledPrefab);
         const tiledNode = prefabNode.getComponent(Tiled);
         tiledNode.setTiledType(tiledValue); //赋值地砖类型
+        if (tiledValue != TiledType.grass) {
+          tiledNode.node.setSiblingIndex(0); //非草地的草地放在最底层
+        }
         if (tiledValue == TiledType.ice || tiledValue == TiledType.grass) {
           tiledNode.node.getComponent(Collider2D).enabled = false; //冰块和草地不设置碰撞
         }
@@ -84,4 +95,11 @@ export class Map extends Component {
   }
 
   update(deltaTime: number) {}
+
+  createHeroTank() {
+    var tankNode = instantiate(this.tankPrefab);
+    tankNode.setPosition(new Vec3(0, 0, 0));
+    tankNode.getComponent(Tank).useAiMove = true;
+    this.node.addChild(tankNode); // 地砖添加到地图节点下
+  }
 }

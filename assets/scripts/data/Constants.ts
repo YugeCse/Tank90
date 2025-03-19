@@ -1,6 +1,7 @@
 import { _decorator, Component, math, Node, Vec2 } from "cc";
 const { ccclass, property } = _decorator;
 
+/** 常量声明 */
 @ccclass("Constants")
 export class Constants {
   /** 地块大小：16x16 */

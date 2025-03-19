@@ -813,6 +813,10 @@
       "__uuid__": "216cb5ec-8603-4077-8a8e-2bc353ccf827",
       "__expectedType__": "cc.Prefab"
     },
+    "tankPrefab": {
+      "__uuid__": "fa61a099-aa4a-4fe0-a3cd-dd0649e1f97e",
+      "__expectedType__": "cc.Prefab"
+    },
     "stage": 0,
     "_id": ""
   },
