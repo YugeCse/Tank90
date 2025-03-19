@@ -7,6 +7,7 @@ import {
   Collider2D,
   Component,
   instantiate,
+  math,
   Node,
   Prefab,
   RigidBody2D,
@@ -23,6 +24,7 @@ import { CollisionMask } from "../data/CollisionMask";
 import { Tiled } from "./Tiled";
 import { TiledType } from "../data/TiledType";
 import { Tank } from "./Tank";
+import { AudioPlayUtils } from "../utils/AudioPlayUtils";
 const { ccclass, property } = _decorator;
 
 @ccclass("Bullet")
@@ -33,14 +35,23 @@ export class Bullet extends Component {
   @property({ type: SpriteFrame, displayName: "关联图片" })
   reliantSpriteFrame: SpriteFrame = null;
 
-  @property({ displayName: "子弹方向" })
+  @property({ type: SpriteFrame, displayName: "子弹向上图片" })
+  bulletUpSpriteFrames: SpriteFrame = null;
+
+  @property({ type: SpriteFrame, displayName: "子弹向下图片" })
+  bulletDownSpriteFrames: SpriteFrame = null;
+
+  @property({ type: SpriteFrame, displayName: "子弹向左图片" })
+  bulletLeftSpriteFrames: SpriteFrame = null;
+
+  @property({ type: SpriteFrame, displayName: "子弹向右图片" })
+  bulletRightSpriteFrames: SpriteFrame = null;
+
+  @property({ type: String, displayName: "子弹方向" })
   direction: Direction = "NONE";
 
   @property({ type: CCFloat, displayName: "子弹速度" })
   speed: number = Bullet.DEFAULT_SPEED;
-
-  @property({ type: CCFloat, displayName: "子弹原始尺寸" })
-  originSize: number = 5.5;
 
   /** 子弹是否爆炸，如果爆炸了，就不能移动了 */
   private _isBomb: boolean = false;
@@ -54,24 +65,23 @@ export class Bullet extends Component {
     var dirs = DirectionUtils.getValuesWithoutNone();
     var index = dirs.indexOf(this.direction);
     console.log("子弹Offset：", 5 * index, this.direction);
-    var spriteFrame = SpriteFrameUtils.getSpriteFrame({
-      texture: this.reliantSpriteFrame.texture,
-      position: [
-        Constants.WarBulletImagePosition.x +
-          index * this.originSize +
-          (index > 1 ? (index == 3 ? 1.5 : 1) : 0),
-        Constants.WarBulletImagePosition.y,
-      ],
-      size: [this.originSize, this.originSize],
-    });
+    var spriteFrame =
+      this.direction == "UP"
+        ? this.bulletUpSpriteFrames
+        : this.direction == "DOWN"
+        ? this.bulletDownSpriteFrames
+        : this.direction == "LEFT"
+        ? this.bulletLeftSpriteFrames
+        : this.bulletRightSpriteFrames;
     this.node
       .getComponent(UITransform)
-      .setContentSize(
-        this.originSize + (index > 1 ? (index == 3 ? 1.5 : 1) : 0),
-        this.originSize + (index > 1 ? (index == 3 ? 1.5 : 1) : 0)
-      );
+      .setContentSize(spriteFrame.rect.width, spriteFrame.rect.height);
     this.node.getComponent(Sprite).spriteFrame = spriteFrame;
-    const collider = this.node.getComponent(Collider2D);
+    const collider = this.node.getComponent(BoxCollider2D);
+    collider.size = new math.Size(
+      spriteFrame.rect.width,
+      spriteFrame.rect.height
+    );
     collider.on("begin-contact", this.onCollision, this);
     // 设置子弹运行的方向和速度
     var rigidBody = this.node.getComponent(RigidBody2D);
@@ -194,6 +204,7 @@ export class Bullet extends Component {
   /** 子弹爆炸，并销毁 */
   private bombThenDestroy() {
     this._isBomb = true; // 标识子弹爆炸了
+    AudioPlayUtils.Instance.playBulletCrackAudio(); // 播放子弹爆炸音效
     this.getComponent(UITransform).setContentSize(
       Constants.TileBigSize,
       Constants.TileBigSize

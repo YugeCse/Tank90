@@ -18,7 +18,7 @@ export class Constants {
     Constants.WarMapTiledCount * Constants.TiledSize;
 
   /** 战场地图背景颜色 */
-  public static readonly WarMapBackgroundColor = math.Color.GRAY;
+  public static readonly WarMapBackgroundColor = math.Color.BLACK;
 
   /** 战场地块图片起始位置： */
   public static readonly WarMapTiledImagePosition = new Vec2(0, 96);

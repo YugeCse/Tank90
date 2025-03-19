@@ -1,6 +1,6 @@
 import {
   _decorator,
-  Canvas,
+  AudioClip,
   Component,
   director,
   macro,
@@ -11,16 +11,34 @@ import {
   Vec3,
 } from "cc";
 import EventManager from "../events/EventManager";
-import { Map } from "../sprites/Map";
 import { GlobalEvent } from "../events/GlobalEvent";
 import { Tank } from "../sprites/Tank";
 import { Constants } from "../data/Constants";
+import { AudioPlayUtils } from "../utils/AudioPlayUtils";
 const { ccclass, property } = _decorator;
 
 @ccclass("MainScene")
 export class MainScene extends Component {
   @property({ type: Prefab, displayName: "坦克预制体" })
   tankPrefab: Prefab = null;
+
+  @property({ type: AudioClip, displayName: "开始游戏的音频" })
+  startGameAudio: AudioClip = null;
+
+  @property({ type: AudioClip, displayName: "被打击的音频" })
+  attachAudio: AudioClip = null;
+
+  @property({ type: AudioClip, displayName: "坦克移动音频" })
+  tankMoveAudio: AudioClip = null;
+
+  @property({ type: AudioClip, displayName: "子弹爆炸音频" })
+  bulletBombAudio: AudioClip = null;
+
+  @property({ type: AudioClip, displayName: "英雄坦克爆炸音频" })
+  heroTankBombAudio: AudioClip = null;
+
+  @property({ type: AudioClip, displayName: "敌方坦克爆炸音频" })
+  enemyTankBombAudio: AudioClip = null;
 
   @property({ displayName: "Enemy Count" })
   enemyTankCount: number = 20;
@@ -31,20 +49,15 @@ export class MainScene extends Component {
   @property({ displayName: "Hero Life" })
   heroTankLife: number = 3;
 
-  /** 创建英雄坦克对象 */
-  private createHeroTank(): Node {
-    return Tank.create({
-      useAiMove: true,
-      prefab: this.tankPrefab,
-      tankType: Tank.TYPE_ENEMY3_TANK,
-      bornPosition: new Vec3(
-        Constants.TileBigSize / 2 - Constants.WarMapSize / 2,
-        Constants.WarMapSize / 2 - Constants.TileBigSize / 2
-      ),
-    });
-  }
-
   start() {
+    AudioPlayUtils.Instance.init(
+      this.startGameAudio,
+      this.attachAudio,
+      this.tankMoveAudio,
+      this.bulletBombAudio,
+      this.heroTankBombAudio,
+      this.enemyTankBombAudio
+    );
     EventManager.instance()
       .subscribe(GlobalEvent.HERO_TANK_DIE, this, this.onHeroTankDie)
       .subscribe(GlobalEvent.ENEMY_TANK_DIE, this, this.onEnemTankyDie);
@@ -54,6 +67,20 @@ export class MainScene extends Component {
     director
       .getScheduler()
       .schedule(this.checkEnemyTanks, this, 2, macro.REPEAT_FOREVER, 0, false);
+    AudioPlayUtils.Instance.playStartGameAudio(); //播放开始游戏音频
+  }
+
+  /** 创建英雄坦克对象 */
+  private createHeroTank(): Node {
+    return Tank.create({
+      useAiMove: false,
+      prefab: this.tankPrefab,
+      tankType: Tank.TYPE_HERO_TANK,
+      bornPosition: new Vec3(
+        -2 * Constants.TileBigSize,
+        Constants.TileBigSize / 2 - Constants.WarMapSize / 2
+      ),
+    });
   }
 
   /** 检查地方坦克数量，然后看是否需要创建 */

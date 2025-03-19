@@ -189,9 +189,9 @@
     "_far": 2000,
     "_color": {
       "__type__": "cc.Color",
-      "r": 0,
-      "g": 0,
-      "b": 0,
+      "r": 189,
+      "g": 186,
+      "b": 186,
       "a": 255
     },
     "_depth": 1,
@@ -561,6 +561,30 @@
     "tankPrefab": {
       "__uuid__": "fa61a099-aa4a-4fe0-a3cd-dd0649e1f97e",
       "__expectedType__": "cc.Prefab"
+    },
+    "startGameAudio": {
+      "__uuid__": "6ab233d2-c74d-4c7d-85e0-505af569ae8d",
+      "__expectedType__": "cc.AudioClip"
+    },
+    "attachAudio": {
+      "__uuid__": "e637407b-f44d-48c2-b2da-62cc21e812ae",
+      "__expectedType__": "cc.AudioClip"
+    },
+    "tankMoveAudio": {
+      "__uuid__": "be1725f6-de39-4dd8-8793-9f5e85c42568",
+      "__expectedType__": "cc.AudioClip"
+    },
+    "bulletBombAudio": {
+      "__uuid__": "f2617202-363d-45fb-b669-1075aa073e45",
+      "__expectedType__": "cc.AudioClip"
+    },
+    "heroTankBombAudio": {
+      "__uuid__": "47586aaf-d700-408e-a292-fce8d47929b4",
+      "__expectedType__": "cc.AudioClip"
+    },
+    "enemyTankBombAudio": {
+      "__uuid__": "ebd19255-193e-41a8-bfb4-6e7117f544fb",
+      "__expectedType__": "cc.AudioClip"
     },
     "enemyTankCount": 20,
     "enemyTankMaxShownCount": 5,

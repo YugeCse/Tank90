@@ -222,6 +222,22 @@
       "__uuid__": "cd86c4aa-67e4-4609-a851-e04ed95d82a0@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
+    "bulletUpSpriteFrames": {
+      "__uuid__": "144cf589-491d-4ae1-8ce0-ef4de8b8410a@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "bulletDownSpriteFrames": {
+      "__uuid__": "2f511138-27db-4e28-b5d6-3fb065eb3ca6@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "bulletLeftSpriteFrames": {
+      "__uuid__": "54c6c778-e7b4-4df4-b12c-d8f1a6a83404@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "bulletRightSpriteFrames": {
+      "__uuid__": "4ce89ba6-c281-4e78-b4b3-d27f101c2906@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
     "direction": {
       "__type__": "cc.Vec2",
       "x": 0,

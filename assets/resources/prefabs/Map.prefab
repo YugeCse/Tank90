@@ -785,9 +785,9 @@
     "_lineCap": 0,
     "_fillColor": {
       "__type__": "cc.Color",
-      "r": 155,
-      "g": 155,
-      "b": 155,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_miterLimit": 10,
