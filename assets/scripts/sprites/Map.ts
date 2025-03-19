@@ -100,6 +100,7 @@ export class Map extends Component {
     var tankNode = instantiate(this.tankPrefab);
     tankNode.setPosition(new Vec3(0, 0, 0));
     tankNode.getComponent(Tank).useAiMove = true;
+    tankNode.getComponent(Tank).speed = 3; //设置坦克速度
     this.node.addChild(tankNode); // 地砖添加到地图节点下
   }
 }
