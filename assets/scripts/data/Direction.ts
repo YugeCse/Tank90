@@ -20,7 +20,7 @@ export namespace DirectionUtils {
     }
   }
 
-  export function getDirectionNormalize(direction: Direction) {
+  export function getNormailized(direction: Direction) {
     switch (direction) {
       case "UP":
         return new Vec2(0, 1);

@@ -184,9 +184,9 @@ export class Tank extends Component {
 			return;
 		}
 		if (direction == "NONE") return; // 如果方向为NONE，则不发射子弹
-		var directionVec2 = DirectionUtils.getDirectionNormalize(direction);
-		var tankSize = this.node.getComponent(UITransform).contentSize;
 		var rootNode = instantiate(this.bulletPrefab);
+		var directionVec2 = DirectionUtils.getNormailized(direction);
+		var tankSize = this.node.getComponent(UITransform).contentSize;
 		var deltaPosition = new Vec3(
 			(directionVec2.x * tankSize.width) / 2,
 			(directionVec2.y * tankSize.height) / 2
@@ -204,7 +204,7 @@ export class Tank extends Component {
 	/** 设置精灵的线性速度 */
 	setSpriteLinearVelocity(direction: Direction) {
 		var rigidBody = this.getComponent(RigidBody2D);
-		var dirVec2 = DirectionUtils.getDirectionNormalize(direction);
+		var dirVec2 = DirectionUtils.getNormailized(direction);
 		rigidBody.linearVelocity =
 			direction == "NONE" ? Vec2.ZERO : dirVec2.multiplyScalar(this.speed);
 	}

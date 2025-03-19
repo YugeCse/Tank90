@@ -64,7 +64,7 @@ export class Bullet extends Component {
 		collider.on("begin-contact", this.onCollision, this);
 		// 设置子弹运行的方向和速度
 		var rigidBody = this.node.getComponent(RigidBody2D);
-		var dirVec2 = DirectionUtils.getDirectionNormalize(this.direction);
+		var dirVec2 = DirectionUtils.getNormailized(this.direction);
 		rigidBody.linearVelocity = dirVec2.multiplyScalar(this.speed);
 	}
 
