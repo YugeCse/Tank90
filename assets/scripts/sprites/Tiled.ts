@@ -1,10 +1,18 @@
 import {
 	_decorator,
 	CCInteger,
+	Collider2D,
 	Component,
+	instantiate,
+	math,
+	Node,
+	Prefab,
 	RigidBody2D,
 	Sprite,
 	SpriteFrame,
+	UITransform,
+	Vec2,
+	Vec3,
 } from "cc";
 import { TiledType } from "../data/TiledType";
 import { SpriteFrameUtils } from "../utils/SpriteFrameUtils";
@@ -56,4 +64,36 @@ export class Tiled extends Component {
 	}
 
 	update(deltaTime: number) {}
+
+	/**
+	 * 创建地砖节点
+	 * @param options 地砖创建初始参数
+	 */
+	public static create(options: TiledCreationInitialOptions): Node {
+		var prefabNode = instantiate(options.prefab);
+		const tiledNode = prefabNode.getComponent(Tiled);
+		if (
+			options.tiledType == TiledType.ice ||
+			options.tiledType == TiledType.grass
+		) {
+			//冰块和草地不设置碰撞
+			tiledNode.node.getComponent(Collider2D).enabled = false;
+		}
+		tiledNode.setTiledType(options.tiledType); //赋值地砖类型
+		tiledNode.node.setPosition(options.position);
+		tiledNode.node
+			.getComponent(UITransform)
+			.setContentSize(new math.Size(Constants.TiledSize, Constants.TiledSize));
+		return prefabNode;
+	}
+}
+
+/** 地砖创建初始参数声明 */
+export interface TiledCreationInitialOptions {
+	/** 预制体 */
+	prefab: Prefab;
+	/** 坐标位置 */
+	position: Vec3;
+	/** 地砖类型 **/
+	tiledType: number;
 }

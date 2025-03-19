@@ -25,6 +25,9 @@ const { ccclass, property } = _decorator;
 
 @ccclass("Bullet")
 export class Bullet extends Component {
+	/** 默认速度 */
+	public static readonly DEFAULT_SPEED = 5;
+
 	@property({ type: SpriteFrame, displayName: "关联图片" })
 	reliantSpriteFrame: SpriteFrame = null;
 
@@ -32,7 +35,7 @@ export class Bullet extends Component {
 	direction: Direction = "NONE";
 
 	@property({ type: CCFloat, displayName: "子弹速度" })
-	speed: number = 5;
+	speed: number = Bullet.DEFAULT_SPEED;
 
 	@property({ type: CCFloat, displayName: "子弹原始尺寸" })
 	originSize: number = 5.5;
@@ -174,12 +177,15 @@ export class Bullet extends Component {
 
 	/**
 	 * 创建子弹组件
-	 * @param prefab 子弹预制体
-	 * @param tankAnchor 发射子弹的坦克节点
+	 * @param options 初始化参数
 	 */
-	public static create(prefab: Prefab, tankAnchor: Node) {
-		var rootNode = instantiate(prefab);
-		var tank = tankAnchor.getComponent(Tank);
+	public static create(options: BulletCreationInitialOptions) {
+		var rootNode = instantiate(options.prefab);
+		var tank = options.tankAnchor.getComponent(Tank);
+		if (tank.useAiMove) {
+			rootNode.getComponent(BoxCollider2D).group = CollisionMask.EnemyBullet;
+			rootNode.getComponent(RigidBody2D).group = CollisionMask.EnemyBullet;
+		}
 		var tankDirection = tank.direction;
 		var directionVec2 = DirectionUtils.getNormailized(tankDirection);
 		var tankSize = tank.node.getComponent(UITransform).contentSize;
@@ -188,12 +194,19 @@ export class Bullet extends Component {
 			(directionVec2.y * tankSize.height) / 2
 		);
 		rootNode.setPosition(tank.node.position.clone().add(deltaPosition));
-		var bulletNode = rootNode.getComponent(Bullet);
-		bulletNode.direction = tankDirection;
-		if (tank.useAiMove) {
-			rootNode.getComponent(BoxCollider2D).group = CollisionMask.EnemyBullet;
-			rootNode.getComponent(RigidBody2D).group = CollisionMask.EnemyBullet;
-		}
+		var bullet = rootNode.getComponent(Bullet);
+		bullet.direction = tankDirection;
+		bullet.speed = options.speed || Bullet.DEFAULT_SPEED; // 默认速度为5
 		return rootNode;
 	}
+}
+
+/** Bullet创建初始化参数 */
+export interface BulletCreationInitialOptions {
+	/** 预制体 */
+	prefab: Prefab;
+	/** 坦克锚点 */
+	tankAnchor: Node;
+	/** 子弹速度, 不传时为：@see {Bullet.DEFAULT_SPEED} */
+	speed?: number;
 }

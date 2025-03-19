@@ -64,36 +64,23 @@ export class Map extends Component {
 			for (let x = 0; x < stageData[y].length; x++) {
 				let tiledValue = stageData[y][x];
 				if (TiledType.all.every((value) => value != tiledValue)) continue;
-				var prefabNode = instantiate(this.tiledPrefab);
-				const tiledNode = prefabNode.getComponent(Tiled);
-				tiledNode.setTiledType(tiledValue); //赋值地砖类型
+				var location = new Vec3(
+					x * Constants.TiledSize -
+						Constants.WarMapSize / 2.0 +
+						Constants.TiledSize / 2.0,
+					Constants.WarMapSize / 2.0 -
+						y * Constants.TiledSize -
+						Constants.TiledSize / 2.0
+				); //因为坐标系是笛卡尔坐标系，因为上下是反的，所以Y轴计算需要减去
+				var tiledNode = Tiled.create({
+					position: location,
+					tiledType: tiledValue,
+					prefab: this.tiledPrefab,
+				});
 				if (tiledValue != TiledType.grass) {
-					tiledNode.node.setSiblingIndex(0); //非草地的草地放在最底层
+					this.node.addChild(tiledNode); // 地砖添加到地图节点下
 				} else {
-					tiledNode.node.setSiblingIndex(2); //草地放在最上层
-				}
-				if (tiledValue == TiledType.ice || tiledValue == TiledType.grass) {
-					tiledNode.node.getComponent(Collider2D).enabled = false; //冰块和草地不设置碰撞
-				}
-				tiledNode.node.setPosition(
-					new Vec3(
-						x * Constants.TiledSize -
-							Constants.WarMapSize / 2.0 +
-							Constants.TiledSize / 2.0,
-						Constants.WarMapSize / 2.0 -
-							y * Constants.TiledSize -
-							Constants.TiledSize / 2.0
-					)
-				);
-				tiledNode.node
-					.getComponent(UITransform)
-					.setContentSize(
-						new math.Size(Constants.TiledSize, Constants.TiledSize)
-					);
-				if (tiledValue != TiledType.grass) {
-					this.node.addChild(tiledNode.node); // 地砖添加到地图节点下
-				} else {
-					grassNode.addChild(tiledNode.node); // 草地添加到草地节点下
+					grassNode.addChild(tiledNode); // 草地添加到草地节点下
 				}
 				console.log(`添加地砖：${x},${y}, value:${tiledValue}`);
 			}

@@ -35,6 +35,10 @@ import { CollisionMask } from "../data/CollisionMask";
 /** 坦克精灵 */
 @ccclass("Tank")
 export class Tank extends Component {
+
+	/** 默认速度 */
+	public static readonly DEFAULT_SPEED = 3;
+
 	/** 英雄坦克 */
 	public static readonly TYPE_HERO_TANK = 0;
 
@@ -184,7 +188,11 @@ export class Tank extends Component {
 			return;
 		}
 		if (direction == "NONE") return; // 如果方向为NONE，则不发射子弹
-		this.node.parent.addChild(Bullet.create(this.bulletPrefab, this.node)); //子弹追加到界面中
+		var bullet = Bullet.create({
+			prefab: this.bulletPrefab,
+			tankAnchor: this.node,
+		});
+		this.node.parent.addChild(bullet); //子弹追加到界面中
 	}
 
 	/** 设置精灵的线性速度 */
@@ -283,16 +291,12 @@ export class Tank extends Component {
 
 	/**
 	 * 创建坦克对象
-	 * @param prefab 坦克预制体
-	 * @param tankType 坦克类型
-	 * @param useAiMove 是否使用AI移动
-	 * @param speed 坦克速度
-	 * @param bornPosition 出生位置
+	 * @param options 坦克创建选项
 	 */
 	public static create(options: TankCreationInitialOptions): Node {
 		var tankNode = instantiate(options.prefab);
 		var tank = tankNode.getComponent(Tank);
-		tank.speed = options.speed ?? 3; //设置坦克速度
+		tank.speed = options.speed || Tank.DEFAULT_SPEED; //设置坦克速度
 		tank.useAiMove = options.useAiMove ?? false;
 		tank.tankType = options.tankType ?? Tank.TYPE_HERO_TANK;
 		tankNode.setPosition(options.bornPosition ?? new Vec3(0, 0, 0));
@@ -300,13 +304,16 @@ export class Tank extends Component {
 	}
 }
 
-/**
- * 坦克创建选项
- */
-export class TankCreationInitialOptions {
+/** 坦克创建选项 **/
+export interface TankCreationInitialOptions {
+	/** 预制体对象 */
 	prefab: Prefab;
-	useAiMove?: boolean = false;
-	tankType?: number = Tank.TYPE_HERO_TANK;
-	speed?: number = 3;
-	bornPosition?: Vec3 = new Vec3(0, 0, 0);
+	/** 是否使用智能移动 */
+	useAiMove?: boolean;
+	/** 坦克类型，不传时为: @see {Tank.TYPE_HERO_TANK} */
+	tankType?: number;
+	/** 坦克速度，不传时为: @see {Tank.DEFAULT_SPEED} */
+	speed?: number;
+	/** 出生坐标点，不传时为：Vec2(0, 0) */
+	bornPosition?: Vec3;
 }
