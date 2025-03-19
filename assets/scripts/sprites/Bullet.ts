@@ -150,7 +150,11 @@ export class Bullet extends Component {
     otherCollider: Collider2D
   ) {
     selfCollider.enabled = false;
+    otherCollider.enabled = false;
     this.scheduleOnce(() => {
+      if (otherCollider.node) {
+        otherCollider.node.removeFromParent();
+      }
       if (this.node) this.bombThenDestroy();
     });
   }

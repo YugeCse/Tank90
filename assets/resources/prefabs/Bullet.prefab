@@ -152,7 +152,7 @@
     },
     "tag": 0,
     "_group": 16,
-    "_density": 1,
+    "_density": 0,
     "_sensor": false,
     "_friction": 0,
     "_restitution": 0,
@@ -244,7 +244,6 @@
       "y": 0
     },
     "speed": 3.5,
-    "originSize": 5.5,
     "_id": ""
   },
   {
