@@ -307,9 +307,9 @@ export class Tank extends Component {
   /** 显示出生时的特效 */
   private showBornEffect() {
     var sprites = new Array<SpriteFrame>();
+    var posX = Constants.tankBornEffectImagePosition.x;
+    var posY = Constants.tankBornEffectImagePosition.y;
     for (var i = 0; i < 7; i++) {
-      var posX = Constants.tankBornEffectImagePosition.x;
-      var posY = Constants.tankBornEffectImagePosition.y;
       var sprite = SpriteFrameUtils.getSpriteFrame({
         texture: this.reliantSpriteFrame.texture,
         position: [posX + Constants.TileBigSize * i, posY],
@@ -321,7 +321,7 @@ export class Tank extends Component {
       sprites,
       sprites.length
     );
-    animClip.duration = 3;
+    animClip.duration = 5;
     animClip.name = "tank_born_effect";
     animClip.wrapMode = AnimationClip.WrapMode.Normal; // 设置动画循环模式
     const animation = this.node.addComponent(Animation);

@@ -82,14 +82,13 @@ export class Bullet extends Component {
   /** 加载爆炸动画 */
   private loadBombSpriteFramesAnimtaion() {
     var bombSprites: SpriteFrame[] = [];
+    var posX = Constants.WarBulletBombImagePosition.x;
+    var posY = Constants.WarBulletBombImagePosition.y;
     for (var i = 0; i < 4; i++) {
       bombSprites.push(
         SpriteFrameUtils.getSpriteFrame({
           texture: this.reliantSpriteFrame.texture,
-          position: [
-            Constants.WarBulletBombImagePosition.x + i * Constants.TileBigSize,
-            Constants.WarBulletBombImagePosition.y,
-          ],
+          position: [posX + i * Constants.TileBigSize, posY],
           size: [Constants.TileBigSize, Constants.TileBigSize],
         })
       );
@@ -102,7 +101,12 @@ export class Bullet extends Component {
     animClip.name = "bullet_bomb_effect";
     animClip.wrapMode = AnimationClip.WrapMode.Normal;
     var animation = this.node.addComponent(Animation);
-    animation.on(Animation.EventType.FINISHED, this.destroy, this, true);
+    animation.on(
+      Animation.EventType.FINISHED,
+      this.removeFromParentNode,
+      this,
+      true
+    );
     animation.addClip(animClip, "bullet_bomb_effect");
   }
 
@@ -221,6 +225,11 @@ export class Bullet extends Component {
     bullet.direction = tankDirection;
     bullet.speed = options.speed || Bullet.DEFAULT_SPEED; // 默认速度为5
     return rootNode;
+  }
+
+  /** 从父节点销毁这个节点 */
+  private removeFromParentNode() {
+    this.node.destroy();
   }
 }
 

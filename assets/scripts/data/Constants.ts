@@ -27,7 +27,7 @@ export class Constants {
   public static readonly WarBulletImagePosition = new Vec2(80.5, 96);
 
   /** 战场子弹爆炸图片起始位置 */
-  public static readonly WarBulletBombImagePosition = new Vec2(320, 0);
+  public static readonly WarBulletBombImagePosition = new Vec2(321, 0);
 
   /** 保护罩的图片坐标 */
   public static readonly protectedImagePosition = new Vec2(160, 96);
