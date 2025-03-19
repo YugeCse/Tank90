@@ -47,7 +47,7 @@ export class Bullet extends Component {
 
   start() {
     if (this.direction == "NONE") {
-      this.scheduleOnce(() => this.node.destroy());
+      this.scheduleOnce(this.removeFromParentNode);
       return;
     }
     this.loadBombSpriteFramesAnimtaion(); // 加载爆炸动画
