@@ -69,6 +69,8 @@ export class Map extends Component {
         tiledNode.setTiledType(tiledValue); //赋值地砖类型
         if (tiledValue != TiledType.grass) {
           tiledNode.node.setSiblingIndex(0); //非草地的草地放在最底层
+        } else {
+          tiledNode.node.setSiblingIndex(2); //草地放在最上层
         }
         if (tiledValue == TiledType.ice || tiledValue == TiledType.grass) {
           tiledNode.node.getComponent(Collider2D).enabled = false; //冰块和草地不设置碰撞
@@ -98,6 +100,7 @@ export class Map extends Component {
 
   createHeroTank() {
     var tankNode = instantiate(this.tankPrefab);
+    tankNode.setSiblingIndex(1); //英雄坦克放在最上层
     tankNode.setPosition(new Vec3(0, 0, 0));
     tankNode.getComponent(Tank).useAiMove = true;
     tankNode.getComponent(Tank).speed = 3; //设置坦克速度
