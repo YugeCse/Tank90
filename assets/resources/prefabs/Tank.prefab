@@ -227,7 +227,7 @@
       "__expectedType__": "cc.Prefab"
     },
     "life": 1,
-    "speed": 80,
+    "speed": 3,
     "numOfHitReceived": 1,
     "direction": {
       "__type__": "cc.Vec2",
