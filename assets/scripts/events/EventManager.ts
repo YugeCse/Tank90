@@ -13,7 +13,7 @@ export default class EventManager {
 	}
 
 	/** 获取实例对象 */
-	instance(): EventManager {
+	public static instance(): EventManager {
 		if (EventManager._instance == null) {
 			EventManager._instance = new EventManager();
 		}
@@ -25,8 +25,9 @@ export default class EventManager {
 	 * @param event 事件名称
 	 * @param args 参数
 	 */
-	postEvent(event: string, ...args: any[]) {
+	postEvent(event: string, ...args: any[]): EventManager {
 		this.eventTarget.emit(event, ...args);
+		return this;
 	}
 
 	/**
@@ -35,7 +36,12 @@ export default class EventManager {
 	 * @param target 订阅者
 	 * @param callback 回调函数
 	 */
-	subscribe(event: string, target: any, callback: (...args: any[]) => void) {
+	subscribe(
+		event: string,
+		target: any,
+		callback: (...args: any[]) => void
+	): EventManager {
 		this.eventTarget.on(event, callback, target);
+		return this;
 	}
 }

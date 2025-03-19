@@ -1,11 +1,8 @@
 import {
 	_decorator,
 	CCInteger,
-	Collider2D,
 	Component,
 	Graphics,
-	instantiate,
-	math,
 	Prefab,
 	UITransform,
 	Vec3,
