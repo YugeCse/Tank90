@@ -86,6 +86,9 @@ export class Tank extends Component {
 	@property({ displayName: "AI自动移动" })
 	useAiMove: boolean = false;
 
+	/** 是否是无敌模式 */
+	isInvincibleMode: boolean = false;
+
 	/** 是否是出生状态 */
 	private _isBornState: boolean = true;
 
@@ -142,11 +145,11 @@ export class Tank extends Component {
 		if (tankType == Tank.TYPE_HERO_TANK) {
 			return new Vec2(0, 0);
 		} else if (tankType == Tank.TYPE_ENEMY3_TANK) {
-			return Constants.enemy3ImagePosition;
+			return Constants.Enemy3ImagePosition;
 		} else if (tankType == Tank.TYPE_ENEMY2_TANK) {
-			return Constants.enemy2ImagePosition;
+			return Constants.Enemy2ImagePosition;
 		}
-		return Constants.enemy1ImagePosition;
+		return Constants.Enemy1ImagePosition;
 	}
 
 	/** 加载精灵帧 */
@@ -321,8 +324,8 @@ export class Tank extends Component {
 	/** 显示出生时的特效 */
 	private showBornEffect() {
 		var sprites = new Array<SpriteFrame>();
-		var posX = Constants.tankBornEffectImagePosition.x;
-		var posY = Constants.tankBornEffectImagePosition.y;
+		var posX = Constants.TankBornEffectImagePosition.x;
+		var posY = Constants.TankBornEffectImagePosition.y;
 		for (var i = 0; i < 7; i++) {
 			var sprite = SpriteFrameUtils.getSpriteFrame({
 				texture: this.reliantSpriteFrame.texture,
@@ -343,6 +346,50 @@ export class Tank extends Component {
 		animation.addClip(animClip);
 		animation.on(Animation.EventType.FINISHED, this.initShowTank, this, true);
 		animation.play("tank_born_effect"); // 播放动画
+		if (!this.useAiMove) this.showStrongProtectEffect(); //显示无敌保护罩效果
+	}
+
+	/** 显示无敌保护罩效果 */
+	showStrongProtectEffect() {
+		this.isInvincibleMode = true;
+		var spriteAnimation: Animation;
+		var clothesSprite = this.node.getChildByName("ClothesSprite");
+		if (!clothesSprite) {
+			var sprites = new Array<SpriteFrame>();
+			for (var i = 0; i < 2; i++) {
+				sprites.push(
+					SpriteFrameUtils.getSpriteFrame({
+						texture: this.reliantSpriteFrame.texture,
+						position: [
+							Constants.ProtectedImagePosition.x + Constants.TileBigSize * i,
+							Constants.ProtectedImagePosition.y,
+						],
+						size: [Constants.TileBigSize, Constants.TileBigSize],
+					})
+				);
+			}
+			var animClip = AnimationClip.createWithSpriteFrames(
+				sprites,
+				sprites.length
+			);
+			animClip.speed = 1.2;
+			animClip.duration = 1;
+			animClip.name = "strong_protect_effect";
+			animClip.wrapMode = AnimationClip.WrapMode.Loop; // 设置动画循环模式
+			var sprite = new Sprite();
+			sprite.name = "ClothesSprite";
+			spriteAnimation = sprite.addComponent(Animation);
+			spriteAnimation.addClip(animClip);
+			clothesSprite = sprite.node;
+			this.node.addChild(clothesSprite);
+		} else {
+			spriteAnimation = clothesSprite.getComponent(Animation);
+		}
+		spriteAnimation.play("strong_protect_effect"); // 播放动画
+		this.scheduleOnce(() => {
+			spriteAnimation.stop();
+			this.isInvincibleMode = false;
+		}, 10); // 10秒后停止播放, 取消无敌模式
 	}
 
 	/**

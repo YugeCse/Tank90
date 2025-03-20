@@ -30,23 +30,23 @@ export class Constants {
   public static readonly WarBulletBombImagePosition = new Vec2(321, 0);
 
   /** 保护罩的图片坐标 */
-  public static readonly protectedImagePosition = new Vec2(160, 96);
+  public static readonly ProtectedImagePosition = new Vec2(160, 96);
 
   /** 坦克出生特效图片坐标 */
-  public static readonly tankBornEffectImagePosition = new Vec2(256, 32);
+  public static readonly TankBornEffectImagePosition = new Vec2(256, 32);
 
   /** 敌人坦克出生时的图片坐标 */
-  public static readonly enemyBornImagePosition = new Vec2(256, 32);
+  public static readonly EnemyBornImagePosition = new Vec2(256, 32);
 
   /** 敌人坦克1的图片坐标 */
-  public static readonly enemy1ImagePosition = new Vec2(0, 32);
+  public static readonly Enemy1ImagePosition = new Vec2(0, 32);
 
   /** 敌人坦克2的图片坐标 */
-  public static readonly enemy2ImagePosition = new Vec2(128, 32);
+  public static readonly Enemy2ImagePosition = new Vec2(128, 32);
 
   /** 敌人坦克3的图片坐标 */
-  public static readonly enemy3ImagePosition = new Vec2(0, 64);
+  public static readonly Enemy3ImagePosition = new Vec2(0, 64);
 
   /** 坦克爆炸的图片坐标 */
-  public static readonly tankBombImagePosition = new Vec2(0, 160);
+  public static readonly TankBombImagePosition = new Vec2(0, 160);
 }
