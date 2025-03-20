@@ -51,8 +51,8 @@ export class MainScene extends Component {
 	heroTankLife: number = 3;
 
 	onLoad() {
-    this.getComponentInChildren("Map").getComponent(Map).stage = 10;
-  }
+		this.getComponentInChildren("Map").getComponent(Map).stage = 10;
+	}
 
 	start() {
 		AudioManager.Instance.init(
@@ -64,15 +64,13 @@ export class MainScene extends Component {
 			this.heroTankBombAudio,
 			this.enemyTankBombAudio
 		);
-		EventManager.instance()
-			.subscribe(GlobalEvent.HERO_TANK_DIE, this, this.onHeroTankDie)
-			.subscribe(GlobalEvent.ENEMY_TANK_DIE, this, this.onEnemTankyDie);
+		EventManager.instance.subscribe(
+			GlobalEvent.HERO_TANK_DIE,
+			this,
+			this.onHeroTankDie
+		).subscribe(GlobalEvent.ENEMY_TANK_DIE, this, this.onEnemTankyDie);
 		var tanksNode = this.node.getChildByName("Tanks");
 		tanksNode.addChild(this.createHeroTank());
-		// Scheduler.enableForTarget(this);
-		// director
-		//   .getScheduler()
-		//   .schedule(this.checkEnemyTanks, this, 2, macro.REPEAT_FOREVER, 0, false);
 		this.generateEnemyTanks(); //检查敌方坦克数量，然后看是否需要创建
 		AudioManager.Instance.playStartGameAudio(); //播放开始游戏音频
 	}

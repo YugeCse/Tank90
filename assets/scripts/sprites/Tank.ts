@@ -311,13 +311,13 @@ export class Tank extends Component {
 	onDestroy() {
 		if (this.useAiMove) {
 			console.log("敌方坦克销毁！！！");
-			EventManager.Instance.postEvent(
+			EventManager.instance.postEvent(
 				GlobalEvent.ENEMY_TANK_DIE,
 				this.tankType
 			);
 			director.getScheduler().unschedule(this.smartMove, this);
 		} else {
-			EventManager.Instance.postEvent(GlobalEvent.HERO_TANK_DIE, this.tankType);
+			EventManager.instance.postEvent(GlobalEvent.HERO_TANK_DIE, this.tankType);
 		}
 	}
 
