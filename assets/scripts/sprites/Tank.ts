@@ -392,6 +392,38 @@ export class Tank extends Component {
 		}, 10); // 10秒后停止播放, 取消无敌模式
 	}
 
+	/** 爆炸，然后销毁 */
+	bombThenDestroy() {
+		// 停止移动
+		this.node.getComponent(RigidBody2D).linearVelocity = Vec2.ZERO;
+		var sprites = new Array<SpriteFrame>();
+		var posX = Constants.TankBombImagePosition.x;
+		var posY = Constants.TankBombImagePosition.y;
+		for (var i = 0; i < 3; i++) {
+			var sprite = SpriteFrameUtils.getSpriteFrame({
+				texture: this.reliantSpriteFrame.texture,
+				position: [posX + Constants.TileBigSize * i, posY],
+				size: [Constants.TileBigSize, Constants.TileBigSize],
+			});
+			sprites.push(sprite); // 添加到数组中
+		}
+		const animClip = AnimationClip.createWithSpriteFrames(
+			sprites,
+			sprites.length
+		);
+		animClip.speed = 1.2;
+		animClip.duration = 3;
+		animClip.name = "tank_bomb_effect";
+		animClip.wrapMode = AnimationClip.WrapMode.Normal; // 设置动画循环模式
+		const animation = this.node.addComponent(Animation);
+		animation.addClip(animClip);
+		animation.on(Animation.EventType.FINISHED, this.initShowTank, this, true);
+		animation.play("tank_bomb_effect"); // 播放动画
+		if (!this.useAiMove)
+			AudioManager.Instance.playHeroTankCrackAudio(); //播放坦克爆炸音效
+		else AudioManager.Instance.playEnemyTankCrackAudio(); //播放坦克爆炸音效
+	}
+
 	/**
 	 * 创建坦克对象
 	 * @param options 坦克创建选项

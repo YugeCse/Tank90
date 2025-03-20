@@ -154,9 +154,8 @@ export class Bullet extends Component {
 		selfCollider.enabled = false;
 		otherCollider.enabled = false;
 		this.scheduleOnce(() => {
-			if (otherCollider.node) {
-				otherCollider.node.destroy();
-			}
+			if (otherCollider.node)
+				otherCollider.node.getComponent(Tank).bombThenDestroy();
 			if (this.node) this.bombThenDestroy();
 		});
 	}
@@ -167,8 +166,21 @@ export class Bullet extends Component {
 		otherCollider: Collider2D
 	) {
 		selfCollider.enabled = false;
+		var isInvincibleMode = false;
+		if (
+			otherCollider.node != null &&
+			otherCollider.node.getComponent(Tank).isInvincibleMode
+		) {
+			isInvincibleMode = true;
+			// 如果英雄坦克处于无敌模式，则不发生碰撞
+			console.log("英雄坦克处于无敌模式，不发生碰撞");
+		} else {
+			otherCollider.enabled = false;
+		}
 		this.scheduleOnce(() => {
 			if (this.node) this.bombThenDestroy();
+			if (!isInvincibleMode)
+				otherCollider.node.getComponent(Tank).bombThenDestroy();
 		});
 	}
 
