@@ -22,6 +22,7 @@ import {
 	RigidBody2D,
 	Scheduler,
 	Sprite,
+	SpriteComponent,
 	SpriteFrame,
 	UITransform,
 	Vec2,
@@ -376,7 +377,7 @@ export class Tank extends Component {
 			animClip.duration = 1;
 			animClip.name = "strong_protect_effect";
 			animClip.wrapMode = AnimationClip.WrapMode.Loop; // 设置动画循环模式
-			var sprite = new Sprite();
+			var sprite = new SpriteComponent();
 			sprite.name = "ClothesSprite";
 			spriteAnimation = sprite.addComponent(Animation);
 			spriteAnimation.addClip(animClip);
@@ -387,8 +388,9 @@ export class Tank extends Component {
 		}
 		spriteAnimation.play("strong_protect_effect"); // 播放动画
 		this.scheduleOnce(() => {
-			spriteAnimation.stop();
 			this.isInvincibleMode = false;
+			spriteAnimation.stop();
+			spriteAnimation.node.removeFromParent();
 		}, 10); // 10秒后停止播放, 取消无敌模式
 	}
 
