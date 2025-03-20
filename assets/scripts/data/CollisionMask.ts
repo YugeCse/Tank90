@@ -26,4 +26,8 @@ export class CollisionMask {
 
   /** 障碍物掩码值 - river */
   public static readonly ObstacleRiver: number = 1 << 8;
+
+  /** 玩家总部掩码值 */
+  public static readonly HeroMaster: number = 1 << 9;
+
 }

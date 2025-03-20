@@ -1,7 +1,9 @@
 import {
 	_decorator,
 	AudioClip,
+	Color,
 	Component,
+	Graphics,
 	Node,
 	Prefab,
 	random,
@@ -51,7 +53,24 @@ export class MainScene extends Component {
 	heroTankLife: number = 3;
 
 	onLoad() {
-		this.getComponentInChildren("Map").getComponent(Map).stage = 10;
+		var graphics = this.node
+			.getChildByName("Background")
+			.getComponent(Graphics) as Graphics;
+		graphics.clear();
+		graphics.fillColor = Color.GRAY;
+		graphics.rect(-512 / 2, -448 / 2, 512, 448);
+		graphics.fill();
+		graphics.strokeColor = Color.BLACK;
+		graphics.stroke();
+		graphics.fill();
+		graphics.fillColor = Color.BLACK;
+		graphics.rect(
+			-Constants.WarMapSize / 2 - 32,
+			-Constants.WarMapSize / 2,
+			Constants.WarMapSize, Constants.WarMapSize);
+		graphics.color = Color.BLACK;
+		graphics.fill();
+		this.node.getChildByName("Map").getComponent(Map).stage = 10;
 	}
 
 	start() {
@@ -64,18 +83,16 @@ export class MainScene extends Component {
 			this.heroTankBombAudio,
 			this.enemyTankBombAudio
 		);
-		EventManager.instance.subscribe(
-			GlobalEvent.HERO_TANK_DIE,
-			this,
-			this.onHeroTankDie
-		).subscribe(GlobalEvent.ENEMY_TANK_DIE, this, this.onEnemTankyDie);
-		var tanksNode = this.node.getChildByName("Tanks");
-		tanksNode.addChild(this.createHeroTank());
+		EventManager.instance
+			.subscribe(GlobalEvent.HERO_TANK_DIE, this, this.onHeroTankDie)
+			.subscribe(GlobalEvent.ENEMY_TANK_DIE, this, this.onEnemTankyDie);
+		this.node.getChildByName("Tanks")
+			.addChild(this.createHeroTank()); //添加我方坦克
 		this.generateEnemyTanks(); //检查敌方坦克数量，然后看是否需要创建
 		AudioManager.Instance.playStartGameAudio(); //播放开始游戏音频
 	}
 
-	/** 创建英雄坦克对象 */
+	/** 创建英雄坦克对象，但不添加到节点中 */
 	private createHeroTank(): Node {
 		return Tank.create({
 			useAiMove: false,
@@ -114,32 +131,36 @@ export class MainScene extends Component {
 			useAiMove: true,
 			tankType: tankType,
 			bornPosition: new Vec3(bornPosX, bornPosY),
+			speed: tankType == Tank.TYPE_ENEMY2_TANK ? 5 : Tank.DEFAULT_SPEED,
 		});
 		this.node.getChildByName("Tanks").addChild(tank);
 	}
 
-	update(deltaTime: number) {}
-
-	// protected onDestroy(): void {
-	//   director.getScheduler().unschedule(this.checkEnemyTanks, this);
-	// }
+	update(deltaTime: number) { }
 
 	/** 英雄坦克死亡 */
 	private onHeroTankDie() {
+		console.log(`MainScene: 英雄坦克被销毁 ${this.heroTankLife}`);
 		this.heroTankLife--;
 		if (this.heroTankLife <= 0) {
-			// director.loadScene("GameOver");
+			console.log(`Game Over`);
+			///TODO 
+			return;
 		}
+		this.node.getChildByName("Tanks")
+			.addChild(this.createHeroTank()); //生成新的英雄坦克
 	}
 
 	/** 敌方坦克死亡  */
 	private onEnemTankyDie() {
+		console.log(`MainScene: 敌方坦克被销毁`);
 		this.enemyTankCount--;
 		if (this.enemyTankCount <= 0) {
-			// director.loadScene("Win");
+			console.log(`Game Win`);
+			///TODO 游戏胜利
 			return;
 		}
-		this.generateEnemyTank();
+		this.generateEnemyTank(); //生成新的地方坦克
 		console.log("MainScene: 敌方坦克被销毁");
 	}
 }

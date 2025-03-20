@@ -31,19 +31,11 @@ export class Map extends Component {
 	private _stageData: Array<Array<number>> = [];
 
 	start() {
-		const graphics = this.node.getComponent(Graphics);
-		var worldPosX = -Constants.WarMapSize / 2;
-		var worldPosY = -Constants.WarMapSize / 2;
-		graphics.color = Constants.WarMapBackgroundColor;
-		graphics.fillRect(
-			worldPosX,
-			worldPosY,
-			Constants.WarMapSize,
-			Constants.WarMapSize
-		);
-		this.node
-			.getComponent(UITransform)
-			.setContentSize(Constants.WarMapSize, Constants.WarMapSize);
+		this.intialize(); // 初始化
+	}
+
+	/** 初始化 */
+	private intialize() {
 		this._stageData = StageMaps.all[this.stage];
 		this.createStageTiledMap(this._stageData); //创建关卡地砖
 	}
@@ -62,11 +54,11 @@ export class Map extends Component {
 					continue;
 				var location = new Vec3(
 					x * Constants.TiledSize -
-						Constants.WarMapSize / 2.0 +
-						Constants.TiledSize / 2.0,
+					Constants.WarMapSize / 2.0 +
+					Constants.TiledSize / 2.0,
 					Constants.WarMapSize / 2.0 -
-						y * Constants.TiledSize -
-						Constants.TiledSize / 2.0
+					y * Constants.TiledSize -
+					Constants.TiledSize / 2.0
 				); //因为坐标系是笛卡尔坐标系，因为上下是反的，所以Y轴计算需要减去
 				var tiledNode = Tiled.create({
 					position: location,
@@ -83,5 +75,5 @@ export class Map extends Component {
 		}
 	}
 
-	update(deltaTime: number) {}
+	update(deltaTime: number) { }
 }

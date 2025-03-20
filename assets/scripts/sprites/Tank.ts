@@ -129,14 +129,7 @@ export class Tank extends Component {
 			Scheduler.enableForTarget(this);
 			director
 				.getScheduler()
-				.schedule(
-					this.smartMove,
-					this,
-					1,
-					macro.REPEAT_FOREVER,
-					0,
-					false
-				);
+				.schedule(this.smartMove, this, 1.6, macro.REPEAT_FOREVER, 0, false);
 		} else {
 			input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
 			input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
@@ -239,6 +232,7 @@ export class Tank extends Component {
 
 	/** 智能移动 */
 	private smartMove() {
+		if (this.tankState == TankState.DEAD) return;
 		var futureDirection = Direction.generateRandomDirection();
 		if (futureDirection != Direction.NONE) {
 			this.direction = futureDirection;
@@ -329,22 +323,6 @@ export class Tank extends Component {
 		}
 	}
 
-	onDestroy() {
-		if (this.useAiMove) {
-			console.log("敌方坦克销毁！！！");
-			EventManager.instance.postEvent(
-				GlobalEvent.ENEMY_TANK_DIE,
-				this.tankType
-			);
-			director.getScheduler().unschedule(this.smartMove, this);
-		} else {
-			EventManager.instance.postEvent(
-				GlobalEvent.HERO_TANK_DIE,
-				this.tankType
-			);
-		}
-	}
-
 	/** 显示出生时的特效 */
 	private showBornEffect() {
 		this.tankState = TankState.BORN;
@@ -359,10 +337,8 @@ export class Tank extends Component {
 			});
 			sprites.push(sprite); // 添加到数组中
 		}
-		const animClip = AnimationClip.createWithSpriteFrames(
-			sprites,
-			sprites.length
-		);
+		const animClip = AnimationClip
+			.createWithSpriteFrames(sprites, sprites.length);
 		animClip.speed = 1.2;
 		animClip.duration = 3;
 		animClip.name = "tank_born_effect";
@@ -429,50 +405,64 @@ export class Tank extends Component {
 
 	/** 爆炸，然后销毁 */
 	bombThenDestroy() {
-		if (this.useAiMove && this.tankState == TankState.DEAD) {
+		if (this.useAiMove
+			&& this.tankState == TankState.DEAD) {
 			director.getScheduler().unschedule(this.smartMove, this);
 		}
+		this.direction = Direction.NONE;
 		this.tankState = TankState.DEAD;
+		this.node.getComponent(RigidBody2D).linearVelocity = Vec2.ZERO;
 		var sprites = new Array<SpriteFrame>();
 		var posX = Constants.TankBombImagePosition.x;
 		var posY = Constants.TankBombImagePosition.y;
 		for (var i = 0; i < 4; i++) {
+			var finalPosX = posX + Constants.TileBigSize * 2 * i +
+				(i > 1 ? 5 : 0) + (i > 2 ? 6 : 0);
 			var sprite = SpriteFrameUtils.clip({
 				clipSize: [
-					Constants.TileBigSize * 2,
-					Constants.TileBigSize * 2,
+					Constants.TileBigSize * 2 + (i == 2 ? 6 : 0),
+					Constants.TileBigSize * 2 + (i == 2 ? 6 : 0),
 				],
+				position: [finalPosX, posY],
 				texture: this.reliantSpriteFrame.texture,
-				position: [posX + Constants.TileBigSize * 2 * i, posY],
 			});
 			sprites.push(sprite); // 添加到数组中
 		}
 		this.node
 			.getComponent(UITransform)
-			.setContentSize(
-				Constants.TileBigSize * 2,
-				Constants.TileBigSize * 2
-			);
-		const animClip = AnimationClip.createWithSpriteFrames(
-			sprites,
-			sprites.length
-		);
-		animClip.speed = 1.2;
-		animClip.duration = 3;
+			.setContentSize(Constants.TileBigSize * 2, Constants.TileBigSize * 2);
+		const animClip = AnimationClip
+			.createWithSpriteFrames(sprites, sprites.length);
+		animClip.speed = 1;
+		animClip.duration = 1.0;
 		animClip.name = "tank_bomb_effect";
 		animClip.wrapMode = AnimationClip.WrapMode.Normal; // 设置动画循环模式
 		const animation = this.node.addComponent(Animation);
 		animation.addClip(animClip);
-		animation.on(
-			Animation.EventType.FINISHED,
-			this.node.destroy,
-			this,
-			true
-		);
+		animation.on(Animation.EventType.FINISHED, this.removeFromParent, this, true);
 		animation.play("tank_bomb_effect"); // 播放动画
 		if (!this.useAiMove)
 			AudioManager.Instance.playHeroTankCrackAudio(); //播放坦克爆炸音效
 		else AudioManager.Instance.playEnemyTankCrackAudio(); //播放坦克爆炸音效
+	}
+
+	/** 从父节点删除 */
+	private removeFromParent() {
+		if (!this.useAiMove) {
+			EventManager.instance.postEvent(
+				GlobalEvent.HERO_TANK_DIE,
+				this.tankType
+			);
+		} else {
+			console.log("敌方坦克销毁！！！");
+			EventManager.instance.postEvent(
+				GlobalEvent.ENEMY_TANK_DIE,
+				this.tankType
+			);
+			director.getScheduler().unschedule(this.smartMove, this);
+		}
+		this.node.destroy();
+		console.log("Tank destroyed");
 	}
 
 	/**

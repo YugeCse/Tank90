@@ -26,6 +26,7 @@ import { TiledType } from "../data/TiledType";
 import { Tank } from "./Tank";
 import { AudioManager } from "../manager/AudioManager";
 import { TankState } from "../data/TankState";
+import { Master } from "./Master";
 const { ccclass, property } = _decorator;
 
 @ccclass("Bullet")
@@ -70,10 +71,10 @@ export class Bullet extends Component {
 			this.direction == "UP"
 				? this.bulletUpSpriteFrames
 				: this.direction == "DOWN"
-				? this.bulletDownSpriteFrames
-				: this.direction == "LEFT"
-				? this.bulletLeftSpriteFrames
-				: this.bulletRightSpriteFrames;
+					? this.bulletDownSpriteFrames
+					: this.direction == "LEFT"
+						? this.bulletLeftSpriteFrames
+						: this.bulletRightSpriteFrames;
 		this.node
 			.getComponent(UITransform)
 			.setContentSize(spriteFrame.rect.width, spriteFrame.rect.height);
@@ -100,7 +101,7 @@ export class Bullet extends Component {
 				SpriteFrameUtils.clip({
 					texture: this.reliantSpriteFrame.texture,
 					position: [posX + i * Constants.TileBigSize, posY],
-					size: [Constants.TileBigSize, Constants.TileBigSize],
+					clipSize: [Constants.TileBigSize, Constants.TileBigSize],
 				})
 			);
 		}
@@ -142,6 +143,8 @@ export class Bullet extends Component {
 			this.handleCollisionWithHeroTank(selfCollider, otherCollider);
 		} else if (otherCollider.group == CollisionMask.Obstacle) {
 			this.handleCollisionWithObstacles(selfCollider, otherCollider);
+		} else if (otherCollider.group == CollisionMask.HeroMaster) {
+			this.handleCollisionWithHeroMaster(selfCollider, otherCollider);
 		}
 	}
 
@@ -151,13 +154,7 @@ export class Bullet extends Component {
 		otherCollider: Collider2D
 	) {
 		selfCollider.enabled = false;
-		if (selfCollider.body) {
-			selfCollider.body.enabled = false;
-		}
 		otherCollider.enabled = false;
-		if (otherCollider.body) {
-			otherCollider.body.enabled = false;
-		}
 		this.scheduleOnce(() => {
 			if (otherCollider.node)
 				otherCollider.node.getComponent(Tank).bombThenDestroy();
@@ -172,17 +169,14 @@ export class Bullet extends Component {
 	) {
 		selfCollider.enabled = false;
 		var isInvincibleMode = false;
-		if (
-			otherCollider.node?.getComponent(Tank)?.tankState !=
-			TankState.PROTECTED
-		) {
+		var tank = otherCollider.node?.getComponent(Tank);
+		if (tank?.tankState == TankState.PROTECTED) {
 			isInvincibleMode = true;
 			// 如果英雄坦克处于无敌模式，则不发生碰撞
 			console.log("英雄坦克处于无敌模式，不发生碰撞");
 		} else {
 			otherCollider.enabled = false;
 		}
-		otherCollider.body.linearVelocity = Vec2.ZERO;
 		this.scheduleOnce(() => {
 			if (this.node) this.bombThenDestroy();
 			if (!isInvincibleMode)
@@ -212,6 +206,20 @@ export class Bullet extends Component {
 			if (this.node && tiledType != TiledType.RIVER)
 				this.bombThenDestroy();
 		});
+	}
+
+	/** 处理与英雄总部发生碰撞 */
+	private handleCollisionWithHeroMaster(
+		selfCollider: Collider2D,
+		otherCollider: Collider2D
+	) {
+		selfCollider.enabled = false;
+		otherCollider.enabled = false;
+		this.scheduleOnce(() => {
+			if (this.node) this.bombThenDestroy();
+			otherCollider.node?.getComponent(Master)?.setToDestroyState();
+		});
+		AudioManager.Instance.playHeroTankCrackAudio(); // 播放英雄坦克被击中音效
 	}
 
 	update(deltaTime: number) {
