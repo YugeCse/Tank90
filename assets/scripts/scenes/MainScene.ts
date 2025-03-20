@@ -70,7 +70,7 @@ export class MainScene extends Component {
 			Constants.WarMapSize, Constants.WarMapSize);
 		graphics.color = Color.BLACK;
 		graphics.fill();
-		this.node.getChildByName("Map").getComponent(Map).stage = 10;
+		this.node.getChildByName("Map").getComponent(Map).stage = 16;
 	}
 
 	start() {
