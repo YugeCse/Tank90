@@ -34,6 +34,8 @@ import { SpriteFrameUtils } from "../utils/SpriteFrameUtils";
 import { Bullet } from "./Bullet";
 import { CollisionMask } from "../data/CollisionMask";
 import { AudioPlayUtils } from "../utils/AudioPlayUtils";
+import EventManager from "../events/EventManager";
+import { GlobalEvent } from "../events/GlobalEvent";
 
 /** 坦克精灵 */
 @ccclass("Tank")
@@ -301,7 +303,12 @@ export class Tank extends Component {
       this._keyPressed.delete(event.keyCode);
     }
   }
+
   onDestroy() {
+    if (this.useAiMove) {
+      console.log("敌方坦克销毁！！！");
+      EventManager.instance().postEvent(GlobalEvent.ENEMY_TANK_DIE);
+    }
     if (!this.useAiMove) return;
     director.getScheduler().unschedule(this.smartMove, this);
   }
@@ -323,7 +330,8 @@ export class Tank extends Component {
       sprites,
       sprites.length
     );
-    animClip.duration = 5;
+    animClip.speed = 1.2;
+    animClip.duration = 3;
     animClip.name = "tank_born_effect";
     animClip.wrapMode = AnimationClip.WrapMode.Normal; // 设置动画循环模式
     const animation = this.node.addComponent(Animation);

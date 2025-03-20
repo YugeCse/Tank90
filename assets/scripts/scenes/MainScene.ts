@@ -63,10 +63,11 @@ export class MainScene extends Component {
       .subscribe(GlobalEvent.ENEMY_TANK_DIE, this, this.onEnemTankyDie);
     var tanksNode = this.node.getChildByName("Tanks");
     tanksNode.addChild(this.createHeroTank());
-    Scheduler.enableForTarget(this);
-    director
-      .getScheduler()
-      .schedule(this.checkEnemyTanks, this, 2, macro.REPEAT_FOREVER, 0, false);
+    // Scheduler.enableForTarget(this);
+    // director
+    //   .getScheduler()
+    //   .schedule(this.checkEnemyTanks, this, 2, macro.REPEAT_FOREVER, 0, false);
+    this.generateEnemyTanks(); //检查敌方坦克数量，然后看是否需要创建
     AudioPlayUtils.Instance.playStartGameAudio(); //播放开始游戏音频
   }
 
@@ -84,44 +85,46 @@ export class MainScene extends Component {
   }
 
   /** 检查地方坦克数量，然后看是否需要创建 */
-  private checkEnemyTanks() {
-    var tanksCount = this.node.getChildByName("Tanks").children;
-    var diffCount = this.enemyTankMaxShownCount - tanksCount.length;
-    if (diffCount > 0) {
-      for (var i = 0; i < diffCount; i++) {
-        var tankTypes = [
-          Tank.TYPE_ENEMY1_TANK,
-          Tank.TYPE_ENEMY2_TANK,
-          Tank.TYPE_ENEMY3_TANK,
-        ];
-        var tankType = tankTypes[Math.floor(Math.random() * tankTypes.length)];
-        var tank = Tank.create({
-          prefab: this.tankPrefab,
-          useAiMove: true,
-          tankType: tankType,
-          bornPosition: new Vec3(
-            random() > 0.5
-              ? Constants.TileBigSize / 2 - Constants.WarMapSize / 2
-              : Constants.WarMapSize / 2 - Constants.TileBigSize / 2,
-            Constants.WarMapSize / 2 - Constants.TileBigSize / 2
-          ),
-        });
-        this.node.getChildByName("Tanks").addChild(tank);
-      }
+  private generateEnemyTanks() {
+    for (var i = 0; i < 5; i++) {
+      this.generateEnemyTank(); //随机生成一个敌方坦克
     }
+    this.enemyTankCount -= 5; //敌方坦克数量减5
+  }
+
+  /** 随机生成一个敌方坦克 */
+  private generateEnemyTank() {
+    var tankTypes = [
+      Tank.TYPE_ENEMY1_TANK,
+      Tank.TYPE_ENEMY2_TANK,
+      Tank.TYPE_ENEMY3_TANK,
+    ];
+    var tankType = tankTypes[Math.floor(Math.random() * tankTypes.length)];
+    var bornPosX =
+      random() > 0.5
+        ? Constants.TileBigSize / 2 - Constants.WarMapSize / 2
+        : Constants.WarMapSize / 2 - Constants.TileBigSize / 2;
+    var bornPosY = -Constants.TileBigSize / 2 + Constants.WarMapSize / 2;
+    var tank = Tank.create({
+      prefab: this.tankPrefab,
+      useAiMove: true,
+      tankType: tankType,
+      bornPosition: new Vec3(bornPosX, bornPosY),
+    });
+    this.node.getChildByName("Tanks").addChild(tank);
   }
 
   update(deltaTime: number) {}
 
-  protected onDestroy(): void {
-    director.getScheduler().unschedule(this.checkEnemyTanks, this);
-  }
+  // protected onDestroy(): void {
+  //   director.getScheduler().unschedule(this.checkEnemyTanks, this);
+  // }
 
   /** 英雄坦克死亡 */
   private onHeroTankDie() {
     this.heroTankLife--;
     if (this.heroTankLife <= 0) {
-      director.loadScene("GameOver");
+      // director.loadScene("GameOver");
     }
   }
 
@@ -129,7 +132,10 @@ export class MainScene extends Component {
   private onEnemTankyDie() {
     this.enemyTankCount--;
     if (this.enemyTankCount <= 0) {
-      director.loadScene("Win");
+      // director.loadScene("Win");
+      return;
     }
+    this.generateEnemyTank();
+    console.log("MainScene: 敌方坦克被销毁");
   }
 }

@@ -25,6 +25,8 @@ import { Tiled } from "./Tiled";
 import { TiledType } from "../data/TiledType";
 import { Tank } from "./Tank";
 import { AudioPlayUtils } from "../utils/AudioPlayUtils";
+import EventManager from "../events/EventManager";
+import { GlobalEvent } from "../events/GlobalEvent";
 const { ccclass, property } = _decorator;
 
 @ccclass("Bullet")
@@ -153,7 +155,7 @@ export class Bullet extends Component {
     otherCollider.enabled = false;
     this.scheduleOnce(() => {
       if (otherCollider.node) {
-        otherCollider.node.removeFromParent();
+        otherCollider.node.destroy();
       }
       if (this.node) this.bombThenDestroy();
     });
