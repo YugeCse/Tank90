@@ -25,6 +25,7 @@ export class AudioPlayUtils {
   private _isPlay: boolean = true;
 
   public init(
+    allowPlay: boolean,
     startGameAudio: AudioClip,
     attackAudio: AudioClip,
     moveAudio: AudioClip,
@@ -32,6 +33,7 @@ export class AudioPlayUtils {
     heroTankCrackAudio: AudioClip,
     enemyTankCrackAudio: AudioClip
   ) {
+    this._isPlay = allowPlay;
     this._audioSource = new AudioSource();
     this._statrtGameAudio = startGameAudio;
     this._attackAudio = attackAudio;
@@ -80,4 +82,13 @@ export class AudioPlayUtils {
     this._audioSource.playOneShot(this._heroTankCrackAudio, 1);
     this._isPlay = true;
   }
+
+  public playEnemyTankCrackAudio() {
+    if (!this._isPlay) {
+      return;
+    }
+    this._audioSource.playOneShot(this._enemyTankCrackAudio, 1);
+    this._isPlay = true;
+  }
+
 }
