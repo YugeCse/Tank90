@@ -308,10 +308,14 @@ export class Tank extends Component {
 	onDestroy() {
 		if (this.useAiMove) {
 			console.log("敌方坦克销毁！！！");
-			EventManager.instance().postEvent(GlobalEvent.ENEMY_TANK_DIE);
+			EventManager.Instance.postEvent(
+				GlobalEvent.ENEMY_TANK_DIE,
+				this.tankType
+			);
+			director.getScheduler().unschedule(this.smartMove, this);
+		} else {
+			EventManager.Instance.postEvent(GlobalEvent.HERO_TANK_DIE, this.tankType);
 		}
-		if (!this.useAiMove) return;
-		director.getScheduler().unschedule(this.smartMove, this);
 	}
 
 	/** 显示出生时的特效 */

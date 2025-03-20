@@ -17,6 +17,7 @@ import {
 import { TiledType } from "../data/TiledType";
 import { SpriteFrameUtils } from "../utils/SpriteFrameUtils";
 import { Constants } from "../data/Constants";
+import { CollisionMask } from "../data/CollisionMask";
 const { ccclass, property } = _decorator;
 
 @ccclass("Tiled")
@@ -76,8 +77,14 @@ export class Tiled extends Component {
 			options.tiledType == TiledType.ice ||
 			options.tiledType == TiledType.grass
 		) {
-			//冰块和草地不设置碰撞
+			// 冰块和草地不设置碰撞
 			tiledNode.node.getComponent(Collider2D).enabled = false;
+			tiledNode.node.getComponent(RigidBody2D).enabled = false;
+		} else if (options.tiledType == TiledType.river) {
+			tiledNode.node.getComponent(Collider2D).group =
+				CollisionMask.ObstacleRiver;
+			tiledNode.node.getComponent(RigidBody2D).group =
+				CollisionMask.ObstacleRiver;
 		}
 		tiledNode.setTiledType(options.tiledType); //赋值地砖类型
 		tiledNode.node.setPosition(options.position);

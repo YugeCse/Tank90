@@ -13,7 +13,7 @@ export default class EventManager {
 	}
 
 	/** 获取实例对象 */
-	public static instance(): EventManager {
+	public static get Instance(): EventManager {
 		if (EventManager._instance == null) {
 			EventManager._instance = new EventManager();
 		}

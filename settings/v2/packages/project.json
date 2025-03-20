@@ -27,18 +27,26 @@
       {
         "index": 6,
         "name": "Prop"
+      },
+      {
+        "index": 7,
+        "name": "ObstacleIce"
+      },
+      {
+        "index": 8,
+        "name": "ObstacleRiver"
       }
     ],
     "collisionMatrix": {
       "0": 60,
       "1": 60,
-      "2": 107,
-      "3": 23,
+      "2": 363,
+      "3": 279,
       "4": 43,
       "5": 23,
       "6": 4,
       "7": 0,
-      "8": 0
+      "8": 12
     },
     "gravity": {
       "y": 0

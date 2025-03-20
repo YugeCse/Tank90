@@ -20,4 +20,10 @@ export class CollisionMask {
 
   /** 道具掩码值 */
   public static readonly Prop: number = 1 << 6;
+
+  /** 障碍物掩码值 - ice */
+  public static readonly ObstacleIce: number = 1 << 7;
+
+  /** 障碍物掩码值 - river */
+  public static readonly ObstacleRiver: number = 1 << 8;
 }

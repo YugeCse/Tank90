@@ -66,7 +66,7 @@ export class Bullet extends Component {
 		this.loadBombSpriteFramesAnimtaion(); // 加载爆炸动画
 		var dirs = DirectionUtils.getValuesWithoutNone();
 		var index = dirs.indexOf(this.direction);
-		console.log("子弹Offset：", 5 * index, this.direction);
+		console.log("子弹生成 Offset：", 5 * index, this.direction);
 		var spriteFrame =
 			this.direction == "UP"
 				? this.bulletUpSpriteFrames
@@ -228,8 +228,8 @@ export class Bullet extends Component {
 		var rootNode = instantiate(options.prefab);
 		var tank = options.tankAnchor.getComponent(Tank);
 		if (tank.useAiMove) {
-			rootNode.getComponent(BoxCollider2D).group = CollisionMask.EnemyBullet;
 			rootNode.getComponent(RigidBody2D).group = CollisionMask.EnemyBullet;
+			rootNode.getComponent(BoxCollider2D).group = CollisionMask.EnemyBullet;
 		}
 		var tankDirection = tank.direction;
 		var directionVec2 = DirectionUtils.getNormailized(tankDirection);
