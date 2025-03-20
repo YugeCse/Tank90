@@ -52,15 +52,14 @@ export class Tiled extends Component {
 			this.node.getComponent(RigidBody2D).enabledContactListener = false;
 			return; // 默认类型不加载且不启用碰撞模式
 		}
-		this.node.getComponent(Sprite).spriteFrame =
-			SpriteFrameUtils.getSpriteFrame({
-				texture: this.reliantSpriteFrame.texture,
-				position: [
-					(type - 1) * Constants.TiledSize,
-					Constants.WarMapTiledImagePosition.y,
-				],
-				size: [Constants.TiledSize, Constants.TiledSize],
-			});
+		this.node.getComponent(Sprite).spriteFrame = SpriteFrameUtils.clip({
+			texture: this.reliantSpriteFrame.texture,
+			position: [
+				(type - 1) * Constants.TiledSize,
+				Constants.WarMapTiledImagePosition.y,
+			],
+			clipSize: [Constants.TiledSize, Constants.TiledSize],
+		});
 		console.log(`地图地砖(${type}帧)加载成功`); //加载地砖成功
 	}
 
@@ -81,7 +80,7 @@ export class Tiled extends Component {
 		} else if (options.tiledType == TiledType.RIVER) {
 			collider.group = CollisionMask.ObstacleRiver;
 			rigidBody.group = CollisionMask.ObstacleRiver;
-		}else if(options.tiledType == TiledType.ICE){
+		} else if (options.tiledType == TiledType.ICE) {
 			collider.group = CollisionMask.ObstacleIce;
 			rigidBody.group = CollisionMask.ObstacleIce;
 		}
@@ -89,7 +88,9 @@ export class Tiled extends Component {
 		tiledNode.node.setPosition(options.position);
 		tiledNode.node
 			.getComponent(UITransform)
-			.setContentSize(new math.Size(Constants.TiledSize, Constants.TiledSize));
+			.setContentSize(
+				new math.Size(Constants.TiledSize, Constants.TiledSize)
+			);
 		return prefabNode;
 	}
 }

@@ -238,11 +238,7 @@
       "__uuid__": "4ce89ba6-c281-4e78-b4b3-d27f101c2906@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
-    "direction": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
+    "direction": "NONE",
     "speed": 3.5,
     "_id": ""
   },

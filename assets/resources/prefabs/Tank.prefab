@@ -226,15 +226,12 @@
       "__uuid__": "995811f4-b39b-4945-93fc-3f2860f0ca89",
       "__expectedType__": "cc.Prefab"
     },
+    "tankState": 0,
     "tankType": 0,
     "life": 1,
     "speed": 3,
     "numOfHitReceived": 1,
-    "direction": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 1
-    },
+    "direction": "UP",
     "useAiMove": false,
     "_id": ""
   },

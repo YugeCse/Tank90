@@ -10,22 +10,23 @@ export class SpriteFrameUtils {
 	 * @param size 裁剪大小
 	 * @returns SpriteFrame对象
 	 */
-	static getSpriteFrame({
+	static clip({
 		texture,
 		position = [0, 0],
-		size = [Constants.TileBigSize, Constants.TileBigSize],
+		clipSize = [Constants.TileBigSize, Constants.TileBigSize],
 	}: {
 		texture: any;
 		position: Array<number>;
-		size: Array<number>;
+		clipSize: Array<number>;
 	}): SpriteFrame {
-		// 创建一个精灵帧
 		var spriteFrame = new SpriteFrame();
-		// 设置精灵帧的纹理
 		spriteFrame.texture = texture;
-		// 设置精灵帧的裁剪区域
-		spriteFrame.rect = new Rect(position[0], position[1], size[0], size[1]);
-		// 返回精灵帧
+		spriteFrame.rect = new Rect(
+			position[0],
+			position[1],
+			clipSize[0],
+			clipSize[1]
+		);
 		return spriteFrame;
 	}
 }

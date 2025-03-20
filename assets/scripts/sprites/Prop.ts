@@ -24,7 +24,7 @@ export class Prop extends Component {
 	propType: number = PropType.AAA;
 
 	start() {
-		this.loadPropSpriteFrame(this.propType);
+		this.loadPropSpriteFrame(this.propType); //加载道具的图片帧
 	}
 
 	/**
@@ -32,13 +32,12 @@ export class Prop extends Component {
 	 * @param propType 道具类型
 	 */
 	private loadPropSpriteFrame(propType: number) {
-        /// TODO: 根据道具类型加载对应的图片帧
-		this.node.getComponent(Sprite).spriteFrame =
-			SpriteFrameUtils.getSpriteFrame({
-				size: [0, 0],
-				position: [0, 0],
-				texture: this.reliantSpriteFrame.texture,
-			});
+		/// TODO: 根据道具类型加载对应的图片帧
+		this.node.getComponent(Sprite).spriteFrame = SpriteFrameUtils.clip({
+			clipSize: [0, 0],
+			position: [0, 0],
+			texture: this.reliantSpriteFrame.texture,
+		});
 		this.node.getComponent(UITransform).setContentSize(new math.Size());
 	}
 
