@@ -7,11 +7,11 @@ import {
 	random,
 	Vec3,
 } from "cc";
-import EventManager from "../events/EventManager";
-import { GlobalEvent } from "../events/GlobalEvent";
+import EventManager from "../manager/EventManager";
+import { GlobalEvent } from "../data/GlobalEvent";
 import { Tank } from "../sprites/Tank";
 import { Constants } from "../data/Constants";
-import { AudioPlayUtils } from "../utils/AudioPlayUtils";
+import { AudioManager } from "../manager/AudioManager";
 import { Map } from "../sprites/Map";
 const { ccclass, property } = _decorator;
 
@@ -55,7 +55,7 @@ export class MainScene extends Component {
   }
 
 	start() {
-		AudioPlayUtils.Instance.init(
+		AudioManager.Instance.init(
 			this.isPlayAudio,
 			this.startGameAudio,
 			this.attachAudio,
@@ -74,7 +74,7 @@ export class MainScene extends Component {
 		//   .getScheduler()
 		//   .schedule(this.checkEnemyTanks, this, 2, macro.REPEAT_FOREVER, 0, false);
 		this.generateEnemyTanks(); //检查敌方坦克数量，然后看是否需要创建
-		AudioPlayUtils.Instance.playStartGameAudio(); //播放开始游戏音频
+		AudioManager.Instance.playStartGameAudio(); //播放开始游戏音频
 	}
 
 	/** 创建英雄坦克对象 */

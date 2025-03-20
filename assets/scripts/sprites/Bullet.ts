@@ -24,9 +24,9 @@ import { CollisionMask } from "../data/CollisionMask";
 import { Tiled } from "./Tiled";
 import { TiledType } from "../data/TiledType";
 import { Tank } from "./Tank";
-import { AudioPlayUtils } from "../utils/AudioPlayUtils";
-import EventManager from "../events/EventManager";
-import { GlobalEvent } from "../events/GlobalEvent";
+import { AudioManager } from "../manager/AudioManager";
+import EventManager from "../manager/EventManager";
+import { GlobalEvent } from "../data/GlobalEvent";
 const { ccclass, property } = _decorator;
 
 @ccclass("Bullet")
@@ -211,7 +211,7 @@ export class Bullet extends Component {
 	/** 子弹爆炸，并销毁 */
 	private bombThenDestroy() {
 		this._isBomb = true; // 标识子弹爆炸了
-		AudioPlayUtils.Instance.playBulletCrackAudio(); // 播放子弹爆炸音效
+		AudioManager.Instance.playBulletCrackAudio(); // 播放子弹爆炸音效
 		this.getComponent(UITransform).setContentSize(
 			Constants.TileBigSize,
 			Constants.TileBigSize

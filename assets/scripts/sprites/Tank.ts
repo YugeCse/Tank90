@@ -33,9 +33,9 @@ import { Constants } from "../data/Constants";
 import { SpriteFrameUtils } from "../utils/SpriteFrameUtils";
 import { Bullet } from "./Bullet";
 import { CollisionMask } from "../data/CollisionMask";
-import { AudioPlayUtils } from "../utils/AudioPlayUtils";
-import EventManager from "../events/EventManager";
-import { GlobalEvent } from "../events/GlobalEvent";
+import { AudioManager } from "../manager/AudioManager";
+import EventManager from "../manager/EventManager";
+import { GlobalEvent } from "../data/GlobalEvent";
 
 /** 坦克精灵 */
 @ccclass("Tank")
@@ -211,7 +211,7 @@ export class Tank extends Component {
 			tankAnchor: this.node,
 		});
 		this.node.parent.addChild(bullet); //子弹追加到界面中
-		if (!this.useAiMove) AudioPlayUtils.Instance.playAttackAudio(); //播放攻击音效
+		if (!this.useAiMove) AudioManager.Instance.playAttackAudio(); //播放攻击音效
 	}
 
 	/** 设置精灵的线性速度 */
