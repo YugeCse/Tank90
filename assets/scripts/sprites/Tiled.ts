@@ -27,7 +27,7 @@ export class Tiled extends Component {
 
 	/** 地砖类型 */
 	@property({ type: CCInteger, min: 0, max: 5, displayName: "地砖类型" })
-	tiledType: number = TiledType.unknown;
+	tiledType: number = TiledType.UNKNOWN;
 
 	/**
 	 * 设置地砖类型
@@ -48,7 +48,7 @@ export class Tiled extends Component {
 	 * @returns 获取到的地砖的精灵帧
 	 */
 	private loadSpriteFrame(type: number = this.tiledType) {
-		if (TiledType.all.every((item) => item !== type)) {
+		if (TiledType.ALL.every((item) => item !== type)) {
 			this.node.getComponent(RigidBody2D).enabledContactListener = false;
 			return; // 默认类型不加载且不启用碰撞模式
 		}
@@ -73,18 +73,17 @@ export class Tiled extends Component {
 	public static create(options: TiledCreationInitialOptions): Node {
 		var prefabNode = instantiate(options.prefab);
 		const tiledNode = prefabNode.getComponent(Tiled);
-		if (
-			options.tiledType == TiledType.ice ||
-			options.tiledType == TiledType.grass
-		) {
-			// 冰块和草地不设置碰撞
-			tiledNode.node.getComponent(Collider2D).enabled = false;
-			tiledNode.node.getComponent(RigidBody2D).enabled = false;
-		} else if (options.tiledType == TiledType.river) {
-			tiledNode.node.getComponent(Collider2D).group =
-				CollisionMask.ObstacleRiver;
-			tiledNode.node.getComponent(RigidBody2D).group =
-				CollisionMask.ObstacleRiver;
+		var collider = tiledNode.node.getComponent(Collider2D);
+		var rigidBody = tiledNode.node.getComponent(RigidBody2D);
+		if (options.tiledType == TiledType.GRASS) {
+			collider.enabled = false;
+			rigidBody.enabled = false;
+		} else if (options.tiledType == TiledType.RIVER) {
+			collider.group = CollisionMask.ObstacleRiver;
+			rigidBody.group = CollisionMask.ObstacleRiver;
+		}else if(options.tiledType == TiledType.ICE){
+			collider.group = CollisionMask.ObstacleIce;
+			rigidBody.group = CollisionMask.ObstacleIce;
 		}
 		tiledNode.setTiledType(options.tiledType); //赋值地砖类型
 		tiledNode.node.setPosition(options.position);

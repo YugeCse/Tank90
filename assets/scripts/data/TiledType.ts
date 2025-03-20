@@ -5,26 +5,25 @@ const { ccclass } = _decorator;
 @ccclass("TiledType")
 export class TiledType {
 	/** 泥墙 */
-	static readonly wall = 1;
+	static readonly WALL = 1;
 	/** 钢墙 */
-	static readonly grid = 2;
+	static readonly GRID = 2;
 	/** 草地 */
-	static readonly grass = 3;
+	static readonly GRASS = 3;
 	/** 河流 */
-	static readonly river = 4;
+	static readonly RIVER = 4;
 	/** 冰地 */
-	static readonly ice = 5;
-
+	static readonly ICE = 5;
 	/**	未知类型 */
-	static readonly unknown = 0;
+	static readonly UNKNOWN = 0;
 
 	/** 所有可用的类型 */
-	static readonly all: Array<number> = [
-		TiledType.wall,
-		TiledType.grid,
-		TiledType.grass,
-		TiledType.river,
-		TiledType.ice,
+	static readonly ALL: Array<number> = [
+		TiledType.WALL,
+		TiledType.GRID,
+		TiledType.GRASS,
+		TiledType.RIVER,
+		TiledType.ICE,
 	];
 
 	/**
@@ -33,15 +32,15 @@ export class TiledType {
 	 */
 	static getDescription(type: number) {
 		switch (type) {
-			case TiledType.wall:
+			case TiledType.WALL:
 				return "泥墙";
-			case TiledType.grid:
+			case TiledType.GRID:
 				return "钢墙";
-			case TiledType.grass:
+			case TiledType.GRASS:
 				return "草地";
-			case TiledType.river:
+			case TiledType.RIVER:
 				return "河流";
-			case TiledType.ice:
+			case TiledType.ICE:
 				return "冰地";
 			default:
 				return "未知类型";

@@ -181,17 +181,17 @@ export class Bullet extends Component {
 		if (!otherNode) return; // 如果没有节点，就返回
 		var tiledType = otherNode.getComponent(Tiled).tiledType;
 		var canDestroy =
-			tiledType != TiledType.grid &&
-			tiledType != TiledType.river &&
-			tiledType != TiledType.grass &&
-			tiledType != TiledType.ice;
+			tiledType != TiledType.GRID &&
+			tiledType != TiledType.RIVER &&
+			tiledType != TiledType.GRASS &&
+			tiledType != TiledType.ICE;
 		console.log("碰撞了墙  是否能被销毁：", canDestroy);
-		if (tiledType != TiledType.river && tiledType != TiledType.ice)
+		if (tiledType != TiledType.RIVER && tiledType != TiledType.ICE)
 			selfCollider.enabled = false;
 		if (canDestroy) otherCollider.enabled = false;
 		this.scheduleOnce(() => {
 			if (canDestroy && otherNode) otherNode.destroy();
-			if (this.node && tiledType != TiledType.river) this.bombThenDestroy();
+			if (this.node && tiledType != TiledType.RIVER) this.bombThenDestroy();
 		});
 	}
 

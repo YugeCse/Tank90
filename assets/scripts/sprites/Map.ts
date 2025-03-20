@@ -59,7 +59,7 @@ export class Map extends Component {
     for (let y = 0; y < stageData.length; y++) {
       for (let x = 0; x < stageData[y].length; x++) {
         let tiledValue = stageData[y][x];
-        if (TiledType.all.every((value) => value != tiledValue)) continue;
+        if (TiledType.ALL.every((value) => value != tiledValue)) continue;
         var location = new Vec3(
           x * Constants.TiledSize -
             Constants.WarMapSize / 2.0 +
@@ -73,7 +73,7 @@ export class Map extends Component {
           tiledType: tiledValue,
           prefab: this.tiledPrefab,
         });
-        if (tiledValue != TiledType.grass) {
+        if (tiledValue != TiledType.GRASS) {
           this.node.addChild(tiledNode); // 地砖添加到地图节点下
         } else {
           grassNode.addChild(tiledNode); // 草地添加到草地节点下
