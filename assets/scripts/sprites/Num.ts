@@ -99,7 +99,7 @@ export class Num extends Component {
   /**
    * 创建数字组组件
    * @param params 创建参数
-   * @returns
+   * @returns 数字组组件以及宽高
    */
   public static createGroup(params: NumCreationParams): {
     node: Node;
