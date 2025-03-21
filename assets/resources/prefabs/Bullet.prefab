@@ -154,7 +154,7 @@
     "_group": 16,
     "_density": 0,
     "_sensor": false,
-    "_friction": 0,
+    "_friction": 1,
     "_restitution": 0,
     "_offset": {
       "__type__": "cc.Vec2",
@@ -218,8 +218,8 @@
     "__prefab": {
       "__id__": 11
     },
-    "reliantSpriteFrame": {
-      "__uuid__": "cd86c4aa-67e4-4609-a851-e04ed95d82a0@f9941",
+    "bulletBombSpriteFrames": {
+      "__uuid__": "db4b6348-4000-4976-a74d-80b2254b58fe@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "bulletUpSpriteFrames": {

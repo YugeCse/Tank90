@@ -218,8 +218,8 @@
     "__prefab": {
       "__id__": 11
     },
-    "reliantSpriteFrame": {
-      "__uuid__": "cd86c4aa-67e4-4609-a851-e04ed95d82a0@f9941",
+    "mapTiledSpriteFrames": {
+      "__uuid__": "0400d7d9-1af1-451f-9666-204db514e91c@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "tiledType": 0,

@@ -5,6 +5,7 @@ import {
 	BoxCollider2D,
 	CCFloat,
 	CCInteger,
+	CCString,
 	Collider2D,
 	Component,
 	director,
@@ -56,16 +57,43 @@ export class Tank extends Component {
 	/** 敌方坦克-样式3 */
 	public static readonly TYPE_ENEMY3_TANK = 3;
 
-	@property({ type: SpriteFrame, displayName: "关联图片" })
-	reliantSpriteFrame: SpriteFrame = null;
+	@property({ type: SpriteFrame, displayName: "坦克保护罩" })
+	tankShieldSpriteFrame: SpriteFrame = null;
+
+	@property({ type: SpriteFrame, displayName: "坦克出生图片" })
+	tankBirthSpriteFrame: SpriteFrame = null;
+
+	@property({ type: SpriteFrame, displayName: "坦克爆炸图片" })
+	tankExplodeSpriteFrame: SpriteFrame = null;
+
+	@property({ type: SpriteFrame, displayName: "英雄坦克1" })
+	heroTank1SpriteFrame: SpriteFrame = null;
+
+	@property({ type: SpriteFrame, displayName: "英雄坦克2" })
+	heroTank2SpriteFrame: SpriteFrame = null;
+
+	@property({ type: SpriteFrame, displayName: "敌方坦克1" })
+	enemyTank1SpriteFrame: SpriteFrame = null;
+
+	@property({ type: SpriteFrame, displayName: "敌方坦克2" })
+	enemyTank2SpriteFrame: SpriteFrame = null;
+
+	@property({ type: SpriteFrame, displayName: "敌方坦克3" })
+	enemyTank3SpriteFrame: SpriteFrame = null;
+
+	@property({ type: SpriteFrame, displayName: "敌方坦克3-1" })
+	enemyTank3a1SpriteFrame: SpriteFrame = null;
+
+	@property({ type: SpriteFrame, displayName: "敌方坦克3-2" })
+	enemyTank3a2SpriteFrame: SpriteFrame = null;
 
 	/** 子弹预制体 */
 	@property({ type: Prefab, displayName: "子弹预制体" })
 	bulletPrefab: Prefab = null;
 
 	/** 坦克状态 */
-	@property({ displayName: "坦克状态" })
-	tankState: TankState = TankState.NONE;
+	@property({ type: CCInteger, displayName: "坦克状态" })
+	tankState: number = TankState.NONE;
 
 	/** 坦克类型 */
 	@property({ type: CCInteger, displayName: "类型" })
@@ -84,7 +112,7 @@ export class Tank extends Component {
 	numOfHitReceived: number = 1;
 
 	/** 移动方向 */
-	@property({ displayName: "移动方向(UP|DOWN|LEFT|RIGHT)" })
+	@property({ type: CCString, displayName: "移动方向(UP|DOWN|LEFT|RIGHT)" })
 	direction: String = Direction.UP;
 
 	/** 是否使用Ai自动移动 */
@@ -104,12 +132,14 @@ export class Tank extends Component {
 	start() {
 		const rigidBody = this.node.getComponent(RigidBody2D);
 		const collider = this.node.getComponent(BoxCollider2D);
-		rigidBody.enabled = false;
 		collider.enabled = false;
+		rigidBody.enabled = false;
+		collider.friction = 0;
+		collider.restitution = 0;
 		if (this.useAiMove) {
-			this.direction = "DOWN";
-			rigidBody.group = CollisionMask.EnemyTank;
+			this.direction = Direction.DOWN;
 			collider.group = CollisionMask.EnemyTank;
+			rigidBody.group = CollisionMask.EnemyTank;
 		}
 		collider.on("begin-contact", this.onCollision, this);
 		this.showBornEffect(); //显示出生效果视图
@@ -120,8 +150,7 @@ export class Tank extends Component {
 		if (this.tankState != TankState.PROTECTED) {
 			this.tankState = TankState.NORMAL;
 		}
-		var imgStartPos = this.getTankSpriteStartPosition(this.tankType);
-		this.loadSpriteFrames(imgStartPos.x, imgStartPos.y); // 加载精灵帧
+		this.loadSpriteFrames(this.tankType); // 加载精灵帧
 		this.getComponent(Collider2D).enabled = true;
 		this.getComponent(RigidBody2D).enabled = true; // 开启刚体和碰撞器
 		if (this.useAiMove) {
@@ -135,42 +164,39 @@ export class Tank extends Component {
 		}
 	}
 
-	onCollision(selfCollider: Collider2D, otherCollider: Collider2D) {}
-
-	/**
-	 * 获取不同类型的坦克的Sprite起始位置
-	 * @param tankType 坦克类型
-	 * @returns 坦克精灵图片的起始位置
-	 */
-	private getTankSpriteStartPosition(tankType: number) {
-		if (tankType == Tank.TYPE_HERO_TANK) {
-			return new Vec2(0, 0);
-		} else if (tankType == Tank.TYPE_ENEMY3_TANK) {
-			return Constants.Enemy3ImagePosition;
-		} else if (tankType == Tank.TYPE_ENEMY2_TANK) {
-			return Constants.Enemy2ImagePosition;
-		}
-		return Constants.Enemy1ImagePosition;
-	}
+	onCollision(selfCollider: Collider2D, otherCollider: Collider2D) { }
 
 	/** 加载精灵帧 */
-	private loadSpriteFrames(imgPosX: number, imgPosY: number) {
-		// 遍历方向数组
+	private loadSpriteFrames(tankType: number) {
 		var dirs = Direction.ValuesWithoutNone;
-		// 获取精灵帧的纹理
-		var texture = this.reliantSpriteFrame.texture;
+		var texture;
+		if (tankType == Tank.TYPE_HERO_TANK) {
+			texture = this.heroTank1SpriteFrame.texture;
+		} else if (tankType == Tank.TYPE_ENEMY1_TANK) {
+			texture = this.enemyTank1SpriteFrame.texture;
+		} else if (tankType == Tank.TYPE_ENEMY2_TANK) {
+			texture = this.enemyTank2SpriteFrame.texture;
+		} else if (tankType == Tank.TYPE_ENEMY3_TANK) {
+			if (this.numOfHitReceived == 2) {
+				texture = this.enemyTank3a1SpriteFrame.texture;
+			} else if (this.numOfHitReceived == 3) {
+				texture = this.enemyTank3a2SpriteFrame.texture;
+			} else {
+				texture = this.enemyTank3SpriteFrame.texture;
+			}
+		} else {
+			throw new Error("未知坦克类型");
+		}
 		for (var index = 0; index < dirs.length; index++) {
 			var dir = dirs[index];
-			// 根据纹理和索引创建精灵帧
 			var spriteFrame = SpriteFrameUtils.clip({
 				texture: texture,
+				position: [index * Constants.TileBigSize, 0],
 				clipSize: [Constants.TileBigSize, Constants.TileBigSize],
-				position: [imgPosX + index * Constants.TileBigSize, imgPosY],
 			});
 			if (index == 0) {
 				this.node.getComponent(Sprite).spriteFrame = spriteFrame;
 			}
-			// 将精灵帧存入精灵帧集合中
 			this._spriteFrames.set(dir, spriteFrame);
 			console.log("Message: Loaded SpriteFrame ", index, dir); // 输出加载成功的精灵帧
 		}
@@ -196,6 +222,11 @@ export class Tank extends Component {
 		if (this.numOfHitReceived <= 0) {
 			this.tankState = TankState.DEAD;
 			this.scheduleOnce(this.bombThenDestroy, 0); // 爆炸并销毁
+			return;
+		}
+		if (this.useAiMove) { // 敌方坦克受伤时，播放音效
+			this.loadSpriteFrames(this.tankType); // 重新加载精灵帧
+			this.getComponent(Sprite).spriteFrame = this._spriteFrames.get(this.direction); // 重新设置精灵帧
 		}
 	}
 
@@ -280,12 +311,10 @@ export class Tank extends Component {
 	private showBornEffect() {
 		this.tankState = TankState.BORN;
 		var sprites = new Array<SpriteFrame>();
-		var posX = Constants.TankBornEffectImagePosition.x;
-		var posY = Constants.TankBornEffectImagePosition.y;
 		for (var i = 0; i < 7; i++) {
 			var sprite = SpriteFrameUtils.clip({
-				texture: this.reliantSpriteFrame.texture,
-				position: [posX + Constants.TileBigSize * i, posY],
+				texture: this.tankBirthSpriteFrame.texture,
+				position: [Constants.TileBigSize * i, 0],
 				clipSize: [Constants.TileBigSize, Constants.TileBigSize],
 			});
 			sprites.push(sprite); // 添加到数组中
@@ -309,17 +338,15 @@ export class Tank extends Component {
 	showStrongProtectEffect() {
 		this.tankState = TankState.PROTECTED;
 		var spriteAnimation: Animation;
-		var imgPosX = Constants.ProtectedImagePosition.x;
-		var imgPosY = Constants.ProtectedImagePosition.y;
 		var clothesSprite = this.node.getChildByName("ClothesSprite");
 		if (!clothesSprite) {
 			var sprites = new Array<SpriteFrame>();
 			for (var i = 0; i < 2; i++) {
 				sprites.push(
 					SpriteFrameUtils.clip({
-						position: [imgPosX, imgPosY + Constants.TileBigSize * i],
+						texture: this.tankShieldSpriteFrame.texture,
+						position: [0, Constants.TileBigSize * i],
 						clipSize: [Constants.TileBigSize, Constants.TileBigSize],
-						texture: this.reliantSpriteFrame.texture,
 					})
 				);
 			}
@@ -357,7 +384,7 @@ export class Tank extends Component {
 	}
 
 	/** 设置坦克状态 */
-	setTankState(state: TankState) {
+	setTankState(state: number) {
 		this.tankState = state;
 		if (state == TankState.DEAD) {
 			if (this.useAiMove) {
@@ -376,21 +403,11 @@ export class Tank extends Component {
 		this.tankState = TankState.DEAD;
 		this.node.getComponent(RigidBody2D).linearVelocity = Vec2.ZERO;
 		var sprites = new Array<SpriteFrame>();
-		var posX = Constants.TankBombImagePosition.x;
-		var posY = Constants.TankBombImagePosition.y;
 		for (var i = 0; i < 4; i++) {
-			var finalPosX =
-				posX +
-				Constants.TileBigSize * 2 * i +
-				(i > 1 ? 5 : 0) +
-				(i > 2 ? 6 : 0);
 			var sprite = SpriteFrameUtils.clip({
-				clipSize: [
-					Constants.TileBigSize * 2 + (i == 2 ? 6 : 0),
-					Constants.TileBigSize * 2 + (i == 2 ? 6 : 0),
-				],
-				position: [finalPosX, posY],
-				texture: this.reliantSpriteFrame.texture,
+				clipSize: [67, 67],
+				position: [67 * i, 0],
+				texture: this.tankExplodeSpriteFrame.texture,
 			});
 			sprites.push(sprite); // 添加到数组中
 		}
@@ -407,12 +424,7 @@ export class Tank extends Component {
 		animClip.wrapMode = AnimationClip.WrapMode.Normal; // 设置动画循环模式
 		const animation = this.node.addComponent(Animation);
 		animation.addClip(animClip);
-		animation.on(
-			Animation.EventType.FINISHED,
-			this.removeFromParent,
-			this,
-			true
-		);
+		animation.on(Animation.EventType.FINISHED, this.removeFromParent, this, true);
 		animation.play("tank_bomb_effect"); // 播放动画
 		if (!this.useAiMove)
 			AudioManager.Instance.playHeroTankCrackAudio(); //播放坦克爆炸音效
@@ -489,6 +501,12 @@ export class Tank extends Component {
 			this._keyPressed.delete(event.keyCode);
 			this.node.getComponent(RigidBody2D).linearVelocity = Vec2.ZERO;
 		}
+	}
+
+	/** 注销键盘事件 */
+	unregisterKeyboardEvents() {
+		input.off(Input.EventType.KEY_UP, this.onKeyUp, this);
+		input.off(Input.EventType.KEY_DOWN, this.onKeyDown, this);
 	}
 
 	/**

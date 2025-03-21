@@ -17,8 +17,8 @@ const { ccclass, property } = _decorator;
 @ccclass("MenuScene")
 export class MenuScene extends Component {
 
-	@property({ type: SpriteFrame, displayName: "关联图片" })
-	reliantSpriteFrame: SpriteFrame = null;
+	@property({ type: SpriteFrame, displayName: "坦克图片" })
+	tankSpriteFrame: SpriteFrame = null;
 
 	start() {
 		var animation = this.node.children
@@ -35,11 +35,7 @@ export class MenuScene extends Component {
 		var selectTank = this.node.children
 			.filter(child => child.name === "SelectTank")[0]
 			.getComponent(Sprite) as Sprite;
-		selectTank.spriteFrame = SpriteFrameUtils.clip({
-			clipSize: [27, 28],
-			position: [128, 96],
-			texture: this.reliantSpriteFrame.texture,
-		});
+		selectTank.spriteFrame = this.tankSpriteFrame;
 	}
 
 	update(deltaTime: number) { }

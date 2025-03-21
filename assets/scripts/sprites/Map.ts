@@ -28,12 +28,14 @@ export class Map extends Component {
 	/** 关卡数据 */
 	private _stageData: Array<Array<number>> = [];
 
-	start() {
-		this.intialize(); // 初始化
-	}
+	start() { }
 
-	/** 初始化 */
-	private intialize() {
+	/**
+	 * 初始化地图
+	 * @param {number} stage 关卡数值
+	 */
+	intialize(stage: number) {
+		this.stage = stage;
 		this._stageData = StageMaps.all[this.stage];
 		this.createStageTiledMap(this._stageData); //创建关卡地砖
 	}

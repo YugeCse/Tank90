@@ -19,10 +19,11 @@ import { Constants } from "../data/Constants";
 import { CollisionMask } from "../data/CollisionMask";
 const { ccclass, property } = _decorator;
 
+/** 地图地砖类 */
 @ccclass("Tiled")
 export class Tiled extends Component {
-	@property({ type: SpriteFrame, displayName: "关联图片" })
-	reliantSpriteFrame: SpriteFrame = null;
+	@property({ type: SpriteFrame, displayName: "地图地块" })
+	mapTiledSpriteFrames: SpriteFrame = null;
 
 	/** 地砖类型 */
 	@property({ type: CCInteger, min: 0, max: 5, displayName: "地砖类型" })
@@ -52,17 +53,14 @@ export class Tiled extends Component {
 			return; // 默认类型不加载且不启用碰撞模式
 		}
 		this.node.getComponent(Sprite).spriteFrame = SpriteFrameUtils.clip({
-			texture: this.reliantSpriteFrame.texture,
-			position: [
-				(type - 1) * Constants.TiledSize,
-				Constants.WarMapTiledImagePosition.y,
-			],
+			texture: this.mapTiledSpriteFrames.texture,
+			position: [(type - 1) * Constants.TiledSize, 0],
 			clipSize: [Constants.TiledSize, Constants.TiledSize],
 		});
 		console.log(`地图地砖(${type}帧)加载成功`); //加载地砖成功
 	}
 
-	update(deltaTime: number) {}
+	update(deltaTime: number) { }
 
 	/**
 	 * 创建地砖节点

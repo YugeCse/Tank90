@@ -4,6 +4,7 @@ import {
 	AnimationClip,
 	BoxCollider2D,
 	CCFloat,
+	CCString,
 	Collider2D,
 	Component,
 	instantiate,
@@ -25,7 +26,6 @@ import { Tiled } from "./Tiled";
 import { TiledType } from "../data/TiledType";
 import { Tank } from "./Tank";
 import { AudioManager } from "../manager/AudioManager";
-import { TankState } from "../data/TankState";
 import { Master } from "./Master";
 const { ccclass, property } = _decorator;
 
@@ -34,8 +34,8 @@ export class Bullet extends Component {
 	/** 默认速度 */
 	public static readonly DEFAULT_SPEED = 5;
 
-	@property({ type: SpriteFrame, displayName: "关联图片" })
-	reliantSpriteFrame: SpriteFrame = null;
+	@property({ type: SpriteFrame, displayName: "子弹爆炸图片" })
+	bulletBombSpriteFrames: SpriteFrame = null;
 
 	@property({ type: SpriteFrame, displayName: "子弹向上图片" })
 	bulletUpSpriteFrames: SpriteFrame = null;
@@ -49,7 +49,7 @@ export class Bullet extends Component {
 	@property({ type: SpriteFrame, displayName: "子弹向右图片" })
 	bulletRightSpriteFrames: SpriteFrame = null;
 
-	@property({ type: String, displayName: "子弹方向(UP|DOWN|LEFT|RIGHT)" })
+	@property({ type: CCString, displayName: "子弹方向(UP|DOWN|LEFT|RIGHT)" })
 	direction: String = Direction.NONE;
 
 	@property({ type: CCFloat, displayName: "子弹速度" })
@@ -94,13 +94,11 @@ export class Bullet extends Component {
 	/** 加载爆炸动画 */
 	private loadBombSpriteFramesAnimtaion() {
 		var bombSprites: SpriteFrame[] = [];
-		var posX = Constants.WarBulletBombImagePosition.x;
-		var posY = Constants.WarBulletBombImagePosition.y;
 		for (var i = 0; i < 4; i++) {
 			bombSprites.push(
 				SpriteFrameUtils.clip({
-					texture: this.reliantSpriteFrame.texture,
-					position: [posX + i * Constants.TileBigSize, posY],
+					texture: this.bulletBombSpriteFrames.texture,
+					position: [i * Constants.TileBigSize, 0],
 					clipSize: [Constants.TileBigSize, Constants.TileBigSize],
 				})
 			);

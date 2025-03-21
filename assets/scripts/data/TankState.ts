@@ -22,21 +22,22 @@ String.prototype.toTankState = function () {
   }
 };
 
+/** 坦克类型声明 */
 export class TankState {
-  private constructor() {}
+  private constructor() { }
 
   /** 无状态 */
-  public static readonly NONE = 0;
+  public static readonly NONE: number = 0;
 
   /** 出生 */
-  public static readonly BORN = 1;
+  public static readonly BORN: number = 1;
 
   /** 受保护 */
-  public static readonly PROTECTED = 2;
+  public static readonly PROTECTED: number = 2;
 
   /** 正常 */
-  public static readonly NORMAL = 3;
+  public static readonly NORMAL: number = 3;
 
   /** 死亡 */
-  public static readonly DEAD = 4;
+  public static readonly DEAD: number = 4;
 }

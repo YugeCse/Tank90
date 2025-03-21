@@ -196,7 +196,7 @@
     "_priority": 0,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 607.6345840130506,
+    "_orthoHeight": 669.9065420560747,
     "_near": 0,
     "_far": 2000,
     "_color": {
@@ -1399,7 +1399,7 @@
       "__uuid__": "fa61a099-aa4a-4fe0-a3cd-dd0649e1f97e",
       "__expectedType__": "cc.Prefab"
     },
-    "isPlayAudio": false,
+    "isPlayAudio": true,
     "startGameAudio": {
       "__uuid__": "6ab233d2-c74d-4c7d-85e0-505af569ae8d",
       "__expectedType__": "cc.AudioClip"
@@ -1423,6 +1423,10 @@
     "enemyTankBombAudio": {
       "__uuid__": "f2617202-363d-45fb-b669-1075aa073e45",
       "__expectedType__": "cc.AudioClip"
+    },
+    "gameOverSpriteFrame": {
+      "__uuid__": "77ca2d2a-7eaa-4d5c-8e71-fd3faf8bf5f7@f9941",
+      "__expectedType__": "cc.SpriteFrame"
     },
     "enemyTankCount": 20,
     "enemyTankMaxShownCount": 5,

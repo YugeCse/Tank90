@@ -218,8 +218,44 @@
     "__prefab": {
       "__id__": 11
     },
-    "reliantSpriteFrame": {
-      "__uuid__": "cd86c4aa-67e4-4609-a851-e04ed95d82a0@f9941",
+    "tankShieldSpriteFrame": {
+      "__uuid__": "0838464e-cfb2-4aa1-96bf-68a29efecc9a@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "tankBirthSpriteFrame": {
+      "__uuid__": "2a57a8ea-e53d-4b09-89c2-329b4b7ec30e@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "tankExplodeSpriteFrame": {
+      "__uuid__": "da512523-d3fe-4f8a-b0a3-1bbaccd40a63@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "heroTank1SpriteFrame": {
+      "__uuid__": "fb828285-a0f5-4971-8d0a-9d268eb0264a@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "heroTank2SpriteFrame": {
+      "__uuid__": "91ce7eb9-b6ee-4303-97a8-1aa8f122a07d@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "enemyTank1SpriteFrame": {
+      "__uuid__": "78ed89ad-6272-4e8c-86a7-23500516a5ae@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "enemyTank2SpriteFrame": {
+      "__uuid__": "11977208-6347-49be-a9bf-12026c70246d@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "enemyTank3SpriteFrame": {
+      "__uuid__": "b3615ddd-7df2-45bf-bbd0-8c679876d875@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "enemyTank3a1SpriteFrame": {
+      "__uuid__": "1bf8f01c-0c54-4f6e-a798-65bddf168382@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "enemyTank3a2SpriteFrame": {
+      "__uuid__": "ac06feb0-6e75-430f-a30e-c1d7c0b042c8@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "bulletPrefab": {
