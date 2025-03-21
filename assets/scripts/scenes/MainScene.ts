@@ -1,6 +1,7 @@
 import {
 	_decorator,
 	AudioClip,
+	CCInteger,
 	Color,
 	Component,
 	Graphics,
@@ -59,6 +60,9 @@ export class MainScene extends Component {
 	@property({ type: SpriteFrame, displayName: "敌方坦克标记" })
 	enemyTankMarkSpriteFrame: SpriteFrame = null;
 
+	@property({ type: CCInteger, displayName: "关卡" })
+	stage: number = 1;
+
 	@property({ displayName: "Enemy Count" })
 	enemyTankCount: number = 20;
 
@@ -87,10 +91,11 @@ export class MainScene extends Component {
 			.subscribe(GlobalEvent.ENEMY_TANK_DIE, this, this.onEnemTankyDie)
 			.subscribe(GlobalEvent.HERO_MASTER_DIE, this, this.onHeroMasterDie);
 		this.showEnemyMarkerBoard(); //显示敌人标记面板
-		this.showHeroLifeBoard(); //显示英雄生命值面板
+		this.showHeroLife(); //显示英雄生命值面板
+		this.showStageLevel(); //显示关卡面板
 		this.generateEnemyTanks(); //检查敌方坦克数量，然后看是否需要创建
 		this.node.getChildByName("Tanks").addChild(this.createHeroTank()); //添加我方坦克
-		this.node.getChildByName("Map").getComponent(Map).intialize(16); //初始化地图
+		this.node.getChildByName("Map").getComponent(Map).intialize(this.stage); //初始化地图
 	}
 
 	/** 绘制背景边界 */
@@ -252,14 +257,14 @@ export class MainScene extends Component {
 	}
 
 	/** 显示英雄生命面板 */
-	private showHeroLifeBoard() {
+	private showHeroLife() {
 		var heroLifeBoardNode = this.node
 			.getChildByName("Information")
 			.getChildByName("Player1Tag");
 		var numNode = Num.createGroup({
 			prefab: this.numPrefab,
 			value: this.heroTankLife,
-			position: new Vec3(10, -14),
+			position: new Vec3(10, -10),
 		})
 		heroLifeBoardNode.addChild(numNode.node);
 		var hero2LifeBoardNode = this.node
@@ -268,9 +273,22 @@ export class MainScene extends Component {
 		var numNode = Num.createGroup({
 			prefab: this.numPrefab,
 			value: 0,
-			position: new Vec3(10, -14),
+			position: new Vec3(10, -10),
 		})
 		hero2LifeBoardNode.addChild(numNode.node);
+	}
+
+	/** 显示关卡等级 */
+	private showStageLevel() {
+		var stageLevelNode = this.node
+			.getChildByName("Information")
+			.getChildByName("StageFlag");
+		var numNode = Num.createGroup({
+			prefab: this.numPrefab,
+			value: this.stage,
+			position: new Vec3(10, -10),
+		})
+		stageLevelNode.addChild(numNode.node);
 	}
 
 }
