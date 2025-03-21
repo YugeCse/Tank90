@@ -4,6 +4,7 @@ import {
 	Color,
 	Component,
 	Graphics,
+	instantiate,
 	Mask,
 	Node,
 	Prefab,
@@ -20,12 +21,16 @@ import { Tank } from "../sprites/Tank";
 import { Constants } from "../data/Constants";
 import { AudioManager } from "../manager/AudioManager";
 import { Map } from "../sprites/Map";
+import { Num } from "../sprites/Num";
 const { ccclass, property } = _decorator;
 
 @ccclass("MainScene")
 export class MainScene extends Component {
 	@property({ type: Prefab, displayName: "坦克预制体" })
 	tankPrefab: Prefab = null;
+
+	@property({ type: Prefab, displayName: "数字预制体" })
+	numPrefab: Prefab = null;
 
 	@property({ displayName: "是否允许播放声音" })
 	isPlayAudio: boolean = false;
@@ -81,10 +86,11 @@ export class MainScene extends Component {
 			.subscribe(GlobalEvent.HERO_TANK_DIE, this, this.onHeroTankDie)
 			.subscribe(GlobalEvent.ENEMY_TANK_DIE, this, this.onEnemTankyDie)
 			.subscribe(GlobalEvent.HERO_MASTER_DIE, this, this.onHeroMasterDie);
-		this.generateEnemyTanks(); //检查敌方坦克数量，然后看是否需要创建
 		this.showEnemyMarkerBoard(); //显示敌人标记面板
+		this.showHeroLifeBoard(); //显示英雄生命值面板
+		this.generateEnemyTanks(); //检查敌方坦克数量，然后看是否需要创建
 		this.node.getChildByName("Tanks").addChild(this.createHeroTank()); //添加我方坦克
-		this.node.getChildByName("Map").getComponent(Map).intialize(18); //初始化地图
+		this.node.getChildByName("Map").getComponent(Map).intialize(16); //初始化地图
 	}
 
 	/** 绘制背景边界 */
@@ -188,7 +194,12 @@ export class MainScene extends Component {
 
 	/** 显示游戏结束 */
 	private showGameOver() {
+		if (this.node.getChildByName("GameOver")) {
+			console.log("MainScene: 游戏结束面板已存在");
+			return;
+		}
 		var node = new Node();
+		node.name = "GameOver";
 		node.setPosition(new Vec3(0, 0));
 		var uiTransform = node.addComponent(UITransform);
 		uiTransform.setContentSize(
@@ -238,6 +249,28 @@ export class MainScene extends Component {
 			enemyBoardNode.addChild(node);
 			this._enemyMarkerNodes.push(node); //记录节点
 		}
+	}
+
+	/** 显示英雄生命面板 */
+	private showHeroLifeBoard() {
+		var heroLifeBoardNode = this.node
+			.getChildByName("Information")
+			.getChildByName("Player1Tag");
+		var numNode = Num.createGroup({
+			prefab: this.numPrefab,
+			value: this.heroTankLife,
+			position: new Vec3(10, -14),
+		})
+		heroLifeBoardNode.addChild(numNode.node);
+		var hero2LifeBoardNode = this.node
+			.getChildByName("Information")
+			.getChildByName("Player2Tag");
+		var numNode = Num.createGroup({
+			prefab: this.numPrefab,
+			value: 0,
+			position: new Vec3(10, -14),
+		})
+		hero2LifeBoardNode.addChild(numNode.node);
 	}
 
 }
