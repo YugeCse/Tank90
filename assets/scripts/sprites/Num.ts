@@ -1,5 +1,6 @@
 import {
   _decorator,
+  CCInteger,
   Component,
   instantiate,
   Layout,
@@ -47,7 +48,7 @@ export class Num extends Component {
   num9SpriteFrame: SpriteFrame = null;
 
   /** 数值0-9，不能包括两位数 */
-  @property({ type: SpriteFrame, displayName: "数字(0-9)" })
+  @property({ type: CCInteger, displayName: "数字(0-9)" })
   value: number = 0;
 
   /** 组件宽度 */
