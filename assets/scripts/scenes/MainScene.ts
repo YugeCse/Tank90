@@ -65,7 +65,7 @@ export class MainScene extends Component {
 		graphics.fill();
 		graphics.fillColor = Color.BLACK;
 		graphics.rect(
-			-Constants.WarMapSize / 2 - 32,
+			-Constants.WarMapSize / 2 - 16,
 			-Constants.WarMapSize / 2,
 			Constants.WarMapSize, Constants.WarMapSize);
 		graphics.color = Color.BLACK;
