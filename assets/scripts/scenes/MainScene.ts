@@ -57,6 +57,8 @@ export class MainScene extends Component {
 			.getChildByName("Background")
 			.getComponent(Graphics) as Graphics;
 		graphics.clear();
+		graphics.fillColor = Color.BLACK;
+		graphics.fill();
 		graphics.fillColor = Color.GRAY;
 		graphics.rect(-512 / 2, -448 / 2, 512, 448);
 		graphics.fill();
