@@ -81,8 +81,8 @@ export class MainScene extends Component {
 			.subscribe(GlobalEvent.HERO_TANK_DIE, this, this.onHeroTankDie)
 			.subscribe(GlobalEvent.ENEMY_TANK_DIE, this, this.onEnemTankyDie)
 			.subscribe(GlobalEvent.HERO_MASTER_DIE, this, this.onHeroMasterDie);
-		this.showEnemyMarkerBoard(); //显示敌人标记面板
 		this.generateEnemyTanks(); //检查敌方坦克数量，然后看是否需要创建
+		this.showEnemyMarkerBoard(); //显示敌人标记面板
 		this.node.getChildByName("Tanks").addChild(this.createHeroTank()); //添加我方坦克
 		this.node.getChildByName("Map").getComponent(Map).intialize(18); //初始化地图
 	}
@@ -224,7 +224,7 @@ export class MainScene extends Component {
 		var enemyBoardNode = this.node
 			.getChildByName("Information")
 			.getChildByName("EnemyBoard");
-		for (var i = 0; i < 20; i++) {
+		for (var i = 0; i < this.enemyTankCount; i++) {
 			var x = i % 2;
 			var y = Math.floor(i / 2);
 			var node = new Node();
