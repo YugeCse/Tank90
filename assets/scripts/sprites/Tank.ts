@@ -136,7 +136,7 @@ export class Tank extends Component {
 		}
 	}
 
-	onCollision(selfCollider: Collider2D, otherCollider: Collider2D) { }
+	onCollision(selfCollider: Collider2D, otherCollider: Collider2D) {}
 
 	/**
 	 * 获取不同类型的坦克的Sprite起始位置
@@ -184,6 +184,19 @@ export class Tank extends Component {
 	update(deltaTime: number) {
 		if (this.useAiMove && this.tankState == TankState.NORMAL) {
 			this.randomShoot(); // 只有敌方坦克在正常状态下才可以随机射击
+		}
+	}
+
+	/** 受伤 */
+	hurt() {
+		if (this.tankState == TankState.PROTECTED) {
+			console.log("保护状态，无法受伤");
+			return;
+		}
+		--this.numOfHitReceived; //抗打能力减少，为0时，直接销毁
+		if (this.numOfHitReceived <= 0) {
+			this.tankState = TankState.DEAD;
+			this.scheduleOnce(this.bombThenDestroy, 0); // 爆炸并销毁
 		}
 	}
 
@@ -264,12 +277,168 @@ export class Tank extends Component {
 		return raycastResult.length > 0;
 	}
 
+	/** 显示出生时的特效 */
+	private showBornEffect() {
+		this.tankState = TankState.BORN;
+		var sprites = new Array<SpriteFrame>();
+		var posX = Constants.TankBornEffectImagePosition.x;
+		var posY = Constants.TankBornEffectImagePosition.y;
+		for (var i = 0; i < 7; i++) {
+			var sprite = SpriteFrameUtils.clip({
+				texture: this.reliantSpriteFrame.texture,
+				position: [posX + Constants.TileBigSize * i, posY],
+				clipSize: [Constants.TileBigSize, Constants.TileBigSize],
+			});
+			sprites.push(sprite); // 添加到数组中
+		}
+		const animClip = AnimationClip.createWithSpriteFrames(
+			sprites,
+			sprites.length
+		);
+		animClip.speed = 1.2;
+		animClip.duration = 3;
+		animClip.name = "tank_born_effect";
+		animClip.wrapMode = AnimationClip.WrapMode.Normal; // 设置动画循环模式
+		const animation = this.node.addComponent(Animation);
+		animation.addClip(animClip);
+		animation.on(Animation.EventType.FINISHED, this.initShowTank, this, true);
+		animation.play("tank_born_effect"); // 播放动画
+		if (!this.useAiMove) this.showStrongProtectEffect(); //显示无敌保护罩效果
+	}
+
+	/** 显示无敌保护罩效果 */
+	showStrongProtectEffect() {
+		this.tankState = TankState.PROTECTED;
+		var spriteAnimation: Animation;
+		var imgPosX = Constants.ProtectedImagePosition.x;
+		var imgPosY = Constants.ProtectedImagePosition.y;
+		var clothesSprite = this.node.getChildByName("ClothesSprite");
+		if (!clothesSprite) {
+			var sprites = new Array<SpriteFrame>();
+			for (var i = 0; i < 2; i++) {
+				sprites.push(
+					SpriteFrameUtils.clip({
+						position: [imgPosX, imgPosY + Constants.TileBigSize * i],
+						clipSize: [Constants.TileBigSize, Constants.TileBigSize],
+						texture: this.reliantSpriteFrame.texture,
+					})
+				);
+			}
+			var animClip = AnimationClip.createWithSpriteFrames(
+				sprites,
+				sprites.length
+			);
+			animClip.speed = 1.2;
+			animClip.duration = 1;
+			animClip.name = "strong_protect_effect";
+			animClip.wrapMode = AnimationClip.WrapMode.Loop; // 设置动画循环模式
+			var spriteNode = new Node("ClothesSprite");
+			var sprite = spriteNode.addComponent(Sprite);
+			spriteAnimation = sprite.addComponent(Animation);
+			spriteAnimation.addClip(animClip);
+			this.node.addChild(spriteNode);
+		} else {
+			spriteAnimation = clothesSprite.getComponent(Animation);
+		}
+		spriteAnimation.play("strong_protect_effect"); // 播放动画
+		this.scheduleOnce(this.disposeStrongProtectEffect, 10); // 10秒后停止播放, 取消无敌模式
+	}
+
+	/** 取消无敌模式 */
+	disposeStrongProtectEffect() {
+		if (this.node.getChildByName("ClothesSprite")) {
+			this.unschedule(this.disposeStrongProtectEffect); // 取消定时器
+			var spriteAnimation = this.node
+				.getChildByName("ClothesSprite")
+				.getComponent(Animation);
+			spriteAnimation.stop();
+			spriteAnimation.node.removeFromParent();
+		}
+		this.tankState = TankState.NORMAL; // 取消无敌模式
+	}
+
+	/** 设置坦克状态 */
+	setTankState(state: TankState) {
+		this.tankState = state;
+		if (state == TankState.DEAD) {
+			if (this.useAiMove) {
+				director.getScheduler().unschedule(this.smartMove, this);
+			}
+			this.node.getComponent(RigidBody2D).linearVelocity = Vec2.ZERO;
+		} else if (state == TankState.PROTECTED) {
+			this.disposeStrongProtectEffect(); // 取消之前的保护罩
+			this.showStrongProtectEffect(); //显示新的无敌保护罩效果
+		}
+	}
+
+	/** 爆炸，然后销毁 */
+	bombThenDestroy() {
+		this.direction = Direction.NONE;
+		this.tankState = TankState.DEAD;
+		this.node.getComponent(RigidBody2D).linearVelocity = Vec2.ZERO;
+		var sprites = new Array<SpriteFrame>();
+		var posX = Constants.TankBombImagePosition.x;
+		var posY = Constants.TankBombImagePosition.y;
+		for (var i = 0; i < 4; i++) {
+			var finalPosX =
+				posX +
+				Constants.TileBigSize * 2 * i +
+				(i > 1 ? 5 : 0) +
+				(i > 2 ? 6 : 0);
+			var sprite = SpriteFrameUtils.clip({
+				clipSize: [
+					Constants.TileBigSize * 2 + (i == 2 ? 6 : 0),
+					Constants.TileBigSize * 2 + (i == 2 ? 6 : 0),
+				],
+				position: [finalPosX, posY],
+				texture: this.reliantSpriteFrame.texture,
+			});
+			sprites.push(sprite); // 添加到数组中
+		}
+		this.node
+			.getComponent(UITransform)
+			.setContentSize(Constants.TileBigSize * 2, Constants.TileBigSize * 2);
+		const animClip = AnimationClip.createWithSpriteFrames(
+			sprites,
+			sprites.length
+		);
+		animClip.speed = 1;
+		animClip.duration = 1.0;
+		animClip.name = "tank_bomb_effect";
+		animClip.wrapMode = AnimationClip.WrapMode.Normal; // 设置动画循环模式
+		const animation = this.node.addComponent(Animation);
+		animation.addClip(animClip);
+		animation.on(
+			Animation.EventType.FINISHED,
+			this.removeFromParent,
+			this,
+			true
+		);
+		animation.play("tank_bomb_effect"); // 播放动画
+		if (!this.useAiMove)
+			AudioManager.Instance.playHeroTankCrackAudio(); //播放坦克爆炸音效
+		else AudioManager.Instance.playEnemyTankCrackAudio(); //播放坦克爆炸音效
+	}
+
+	/** 从父节点删除 */
+	private removeFromParent() {
+		if (!this.useAiMove) {
+			EventManager.instance.postEvent(GlobalEvent.HERO_TANK_DIE, this.tankType);
+		} else {
+			console.log("敌方坦克销毁！！！");
+			EventManager.instance.postEvent(
+				GlobalEvent.ENEMY_TANK_DIE,
+				this.tankType
+			);
+			director.getScheduler().unschedule(this.smartMove, this);
+		}
+		this.node.destroy();
+		console.log("Tank destroyed");
+	}
+
 	// 当键盘按下时触发
 	onKeyDown(event: EventKeyboard) {
-		if (
-			event.keyCode == KeyCode.KEY_W ||
-			event.keyCode == KeyCode.ARROW_UP
-		) {
+		if (event.keyCode == KeyCode.KEY_W || event.keyCode == KeyCode.ARROW_UP) {
 			this.playerMove(Direction.UP);
 		} else if (
 			event.keyCode == KeyCode.KEY_S ||
@@ -321,148 +490,6 @@ export class Tank extends Component {
 			this._keyPressed.delete(event.keyCode);
 			this.node.getComponent(RigidBody2D).linearVelocity = Vec2.ZERO;
 		}
-	}
-
-	/** 显示出生时的特效 */
-	private showBornEffect() {
-		this.tankState = TankState.BORN;
-		var sprites = new Array<SpriteFrame>();
-		var posX = Constants.TankBornEffectImagePosition.x;
-		var posY = Constants.TankBornEffectImagePosition.y;
-		for (var i = 0; i < 7; i++) {
-			var sprite = SpriteFrameUtils.clip({
-				texture: this.reliantSpriteFrame.texture,
-				position: [posX + Constants.TileBigSize * i, posY],
-				clipSize: [Constants.TileBigSize, Constants.TileBigSize],
-			});
-			sprites.push(sprite); // 添加到数组中
-		}
-		const animClip = AnimationClip
-			.createWithSpriteFrames(sprites, sprites.length);
-		animClip.speed = 1.2;
-		animClip.duration = 3;
-		animClip.name = "tank_born_effect";
-		animClip.wrapMode = AnimationClip.WrapMode.Normal; // 设置动画循环模式
-		const animation = this.node.addComponent(Animation);
-		animation.addClip(animClip);
-		animation.on(
-			Animation.EventType.FINISHED,
-			this.initShowTank,
-			this,
-			true
-		);
-		animation.play("tank_born_effect"); // 播放动画
-		if (!this.useAiMove) this.showStrongProtectEffect(); //显示无敌保护罩效果
-	}
-
-	/** 显示无敌保护罩效果 */
-	showStrongProtectEffect() {
-		this.tankState = TankState.PROTECTED;
-		var spriteAnimation: Animation;
-		var imgPosX = Constants.ProtectedImagePosition.x;
-		var imgPosY = Constants.ProtectedImagePosition.y;
-		var clothesSprite = this.node.getChildByName("ClothesSprite");
-		if (!clothesSprite) {
-			var sprites = new Array<SpriteFrame>();
-			for (var i = 0; i < 2; i++) {
-				sprites.push(
-					SpriteFrameUtils.clip({
-						position: [
-							imgPosX,
-							imgPosY + Constants.TileBigSize * i,
-						],
-						clipSize: [
-							Constants.TileBigSize,
-							Constants.TileBigSize,
-						],
-						texture: this.reliantSpriteFrame.texture,
-					})
-				);
-			}
-			var animClip = AnimationClip.createWithSpriteFrames(
-				sprites,
-				sprites.length
-			);
-			animClip.speed = 1.2;
-			animClip.duration = 1;
-			animClip.name = "strong_protect_effect";
-			animClip.wrapMode = AnimationClip.WrapMode.Loop; // 设置动画循环模式
-			var spriteNode = new Node("ClothesSprite");
-			var sprite = spriteNode.addComponent(Sprite);
-			spriteAnimation = sprite.addComponent(Animation);
-			spriteAnimation.addClip(animClip);
-			this.node.addChild(spriteNode);
-		} else {
-			spriteAnimation = clothesSprite.getComponent(Animation);
-		}
-		spriteAnimation.play("strong_protect_effect"); // 播放动画
-		this.scheduleOnce(() => {
-			this.tankState = TankState.NORMAL;
-			spriteAnimation.stop();
-			spriteAnimation.node.removeFromParent();
-		}, 10); // 10秒后停止播放, 取消无敌模式
-	}
-
-	/** 爆炸，然后销毁 */
-	bombThenDestroy() {
-		if (this.useAiMove
-			&& this.tankState == TankState.DEAD) {
-			director.getScheduler().unschedule(this.smartMove, this);
-		}
-		this.direction = Direction.NONE;
-		this.tankState = TankState.DEAD;
-		this.node.getComponent(RigidBody2D).linearVelocity = Vec2.ZERO;
-		var sprites = new Array<SpriteFrame>();
-		var posX = Constants.TankBombImagePosition.x;
-		var posY = Constants.TankBombImagePosition.y;
-		for (var i = 0; i < 4; i++) {
-			var finalPosX = posX + Constants.TileBigSize * 2 * i +
-				(i > 1 ? 5 : 0) + (i > 2 ? 6 : 0);
-			var sprite = SpriteFrameUtils.clip({
-				clipSize: [
-					Constants.TileBigSize * 2 + (i == 2 ? 6 : 0),
-					Constants.TileBigSize * 2 + (i == 2 ? 6 : 0),
-				],
-				position: [finalPosX, posY],
-				texture: this.reliantSpriteFrame.texture,
-			});
-			sprites.push(sprite); // 添加到数组中
-		}
-		this.node
-			.getComponent(UITransform)
-			.setContentSize(Constants.TileBigSize * 2, Constants.TileBigSize * 2);
-		const animClip = AnimationClip
-			.createWithSpriteFrames(sprites, sprites.length);
-		animClip.speed = 1;
-		animClip.duration = 1.0;
-		animClip.name = "tank_bomb_effect";
-		animClip.wrapMode = AnimationClip.WrapMode.Normal; // 设置动画循环模式
-		const animation = this.node.addComponent(Animation);
-		animation.addClip(animClip);
-		animation.on(Animation.EventType.FINISHED, this.removeFromParent, this, true);
-		animation.play("tank_bomb_effect"); // 播放动画
-		if (!this.useAiMove)
-			AudioManager.Instance.playHeroTankCrackAudio(); //播放坦克爆炸音效
-		else AudioManager.Instance.playEnemyTankCrackAudio(); //播放坦克爆炸音效
-	}
-
-	/** 从父节点删除 */
-	private removeFromParent() {
-		if (!this.useAiMove) {
-			EventManager.instance.postEvent(
-				GlobalEvent.HERO_TANK_DIE,
-				this.tankType
-			);
-		} else {
-			console.log("敌方坦克销毁！！！");
-			EventManager.instance.postEvent(
-				GlobalEvent.ENEMY_TANK_DIE,
-				this.tankType
-			);
-			director.getScheduler().unschedule(this.smartMove, this);
-		}
-		this.node.destroy();
-		console.log("Tank destroyed");
 	}
 
 	/**

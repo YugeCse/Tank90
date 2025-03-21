@@ -156,10 +156,9 @@ export class Bullet extends Component {
 		selfCollider.enabled = false;
 		otherCollider.enabled = false;
 		this.scheduleOnce(() => {
-			if (otherCollider.node)
-				otherCollider.node.getComponent(Tank).bombThenDestroy();
 			if (this.node) this.bombThenDestroy();
 		});
+		otherCollider.node?.getComponent(Tank)?.hurt();
 	}
 
 	/** 与英雄坦克发生碰撞 */
@@ -168,20 +167,10 @@ export class Bullet extends Component {
 		otherCollider: Collider2D
 	) {
 		selfCollider.enabled = false;
-		var isInvincibleMode = false;
-		var tank = otherCollider.node?.getComponent(Tank);
-		if (tank?.tankState == TankState.PROTECTED) {
-			isInvincibleMode = true;
-			// 如果英雄坦克处于无敌模式，则不发生碰撞
-			console.log("英雄坦克处于无敌模式，不发生碰撞");
-		} else {
-			otherCollider.enabled = false;
-		}
 		this.scheduleOnce(() => {
 			if (this.node) this.bombThenDestroy();
-			if (!isInvincibleMode)
-				otherCollider.node.getComponent(Tank).bombThenDestroy();
 		});
+		otherCollider.node?.getComponent(Tank)?.hurt();
 	}
 
 	/** 处理与障碍物发生碰撞的逻辑 */
