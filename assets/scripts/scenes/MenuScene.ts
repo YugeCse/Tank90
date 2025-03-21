@@ -11,7 +11,6 @@ import {
 	Sprite,
 	SpriteFrame,
 } from "cc";
-import { SpriteFrameUtils } from "../utils/SpriteFrameUtils";
 const { ccclass, property } = _decorator;
 
 @ccclass("MenuScene")

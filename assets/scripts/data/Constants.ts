@@ -20,12 +20,4 @@ export class Constants {
   /** 战场地图背景颜色 */
   public static readonly WarMapBackgroundColor = math.Color.BLACK;
 
-  /** 战场地块图片起始位置： */
-  public static readonly WarMapTiledImagePosition = new Vec2(0, 96);
-
-  /** 战场子弹图片起始位置： */
-  public static readonly WarBulletImagePosition = new Vec2(80.5, 96);
-
-  /** 战场子弹爆炸图片起始位置 */
-  public static readonly WarBulletBombImagePosition = new Vec2(321, 0);
 }

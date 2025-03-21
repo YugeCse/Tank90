@@ -51,6 +51,9 @@ export class MainScene extends Component {
 	@property({ type: SpriteFrame, displayName: "游戏结束图片" })
 	gameOverSpriteFrame: SpriteFrame = null;
 
+	@property({ type: SpriteFrame, displayName: "敌方坦克标记" })
+	enemyTankMarkSpriteFrame: SpriteFrame = null;
+
 	@property({ displayName: "Enemy Count" })
 	enemyTankCount: number = 20;
 
@@ -59,6 +62,8 @@ export class MainScene extends Component {
 
 	@property({ displayName: "Hero Life" })
 	heroTankLife: number = 3;
+
+	private _enemyMarkerNodes: Node[] = [];
 
 	start() {
 		this.drawBackgroundBoundary(); //绘制背景边界
@@ -76,8 +81,9 @@ export class MainScene extends Component {
 			.subscribe(GlobalEvent.HERO_TANK_DIE, this, this.onHeroTankDie)
 			.subscribe(GlobalEvent.ENEMY_TANK_DIE, this, this.onEnemTankyDie)
 			.subscribe(GlobalEvent.HERO_MASTER_DIE, this, this.onHeroMasterDie);
-		this.node.getChildByName("Tanks").addChild(this.createHeroTank()); //添加我方坦克
+		this.showEnemyMarkerBoard(); //显示敌人标记面板
 		this.generateEnemyTanks(); //检查敌方坦克数量，然后看是否需要创建
+		this.node.getChildByName("Tanks").addChild(this.createHeroTank()); //添加我方坦克
 		this.node.getChildByName("Map").getComponent(Map).intialize(18); //初始化地图
 	}
 
@@ -170,6 +176,7 @@ export class MainScene extends Component {
 			return;
 		}
 		this.generateEnemyTank(); //生成新的地方坦克
+		this._enemyMarkerNodes.pop().destroy(); //移除敌方坦克标记
 		console.log("MainScene: 敌方坦克被销毁");
 	}
 
@@ -210,6 +217,27 @@ export class MainScene extends Component {
 			.children
 			.filter((child) => child.getComponent(Tank)?.tankType == Tank.TYPE_HERO_TANK)
 			.forEach((child) => child.getComponent(Tank)?.unregisterKeyboardEvents());
+	}
+
+	/** 显示敌方坦克标记面板 */
+	private showEnemyMarkerBoard() {
+		var enemyBoardNode = this.node
+			.getChildByName("Information")
+			.getChildByName("EnemyBoard");
+		for (var i = 0; i < 20; i++) {
+			var x = i % 2;
+			var y = Math.floor(i / 2);
+			var node = new Node();
+			node.addComponent(UITransform)
+				.setContentSize(14, 14);
+			var sprite = node.addComponent(Sprite);
+			sprite.spriteFrame = this.enemyTankMarkSpriteFrame;
+			sprite.type = Sprite.Type.SLICED;
+			sprite.trim = true;
+			node.setPosition(new Vec3(-10 + x * 20, 100 - y * 20));
+			enemyBoardNode.addChild(node);
+			this._enemyMarkerNodes.push(node); //记录节点
+		}
 	}
 
 }
