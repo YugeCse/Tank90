@@ -46,10 +46,14 @@ export class Num extends Component {
   @property({ type: SpriteFrame, displayName: "数字9" })
   num9SpriteFrame: SpriteFrame = null;
 
+  /** 数值0-9，不能包括两位数 */
+  @property({ type: SpriteFrame, displayName: "数字(0-9)" })
   value: number = 0;
 
+  /** 组件宽度 */
   private _width: number = 0;
 
+  /** 组件宽度 */
   private _height: number = 0;
 
   start() {
@@ -57,10 +61,13 @@ export class Num extends Component {
   }
 
   /**
-   * 设置数字
-   * @param value 数字值
+   * 设置数字, 0-9之间
+   * @param value 数字值，0-9之间
    */
   setNum(value: number) {
+    if (value < 0 || value > 9) {
+      throw new Error("数字值必须在0-9之间");
+    }
     this.value = value;
     var spriteFrame = this[`num${value}SpriteFrame`] as SpriteFrame;
     this._width = spriteFrame.width;
@@ -71,10 +78,12 @@ export class Num extends Component {
     this.node.getComponent(Sprite).spriteFrame = spriteFrame;
   }
 
+  /** 获取组件宽度 */
   get width() {
     return this._width;
   }
 
+  /** 获取组件宽度 */
   get height() {
     return this._height;
   }
@@ -133,6 +142,7 @@ export class Num extends Component {
     return { node: node, width: requiredWidth, height: requiredHeight };
   }
 }
+
 /** 数字组件的创建参数 **/
 export interface NumCreationParams {
   /** 预制体 */
