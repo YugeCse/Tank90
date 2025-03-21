@@ -110,8 +110,11 @@ export class Num extends Component {
     var requiredWidth = 0;
     var requiredHeight = 0;
     var uiTransform = node.addComponent(UITransform);
-    var hrozintalContainer = node.addComponent(Layout);
-    hrozintalContainer.type = Layout.Type.HORIZONTAL;
+    var container = node.addComponent(Layout);
+    container.type = Layout.Type.HORIZONTAL;
+    container.alignVertical = true;
+    container.resizeMode = Layout.ResizeMode.CONTAINER;
+    container.horizontalDirection = Layout.HorizontalDirection.LEFT_TO_RIGHT;
     node.setPosition(params.position);
     var numTexts = params.value.toString().split(".")[0];
     for (var i = 0; i < numTexts.length; i++) {
