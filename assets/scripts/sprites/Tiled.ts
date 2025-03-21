@@ -11,7 +11,6 @@ import {
 	Sprite,
 	SpriteFrame,
 	UITransform,
-	Vec2,
 	Vec3,
 } from "cc";
 import { TiledType } from "../data/TiledType";

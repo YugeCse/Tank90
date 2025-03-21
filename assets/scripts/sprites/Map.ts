@@ -2,9 +2,7 @@ import {
 	_decorator,
 	CCInteger,
 	Component,
-	Graphics,
 	Prefab,
-	UITransform,
 	Vec3,
 } from "cc";
 import { Constants } from "../data/Constants";

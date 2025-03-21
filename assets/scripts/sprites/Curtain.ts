@@ -1,10 +1,11 @@
 import { _decorator, Animation, Component, Node } from "cc";
 const { ccclass, property } = _decorator;
 
+/** 关卡幕布控制类 */
 @ccclass("Curtain")
 export class Curtain extends Component {
 	start() {
-		this.scheduleOnce(this.openCurtains, 2.5); //等待2.5s后打开幕布
+		this.scheduleOnce(this.openCurtains, 2); //等待2s后打开幕布
 	}
 
 	update(deltaTime: number) {}

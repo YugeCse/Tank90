@@ -22,7 +22,6 @@ import {
 	RigidBody2D,
 	Scheduler,
 	Sprite,
-	SpriteComponent,
 	SpriteFrame,
 	UITransform,
 	Vec2,
