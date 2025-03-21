@@ -286,7 +286,7 @@ export class MainScene extends Component {
 		var numNode = Num.createGroup({
 			prefab: this.numPrefab,
 			value: this.stage,
-			position: new Vec3(10, -10),
+			position: new Vec3(5, -10),
 		})
 		stageLevelNode.addChild(numNode.node);
 	}
