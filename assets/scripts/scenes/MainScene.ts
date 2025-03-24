@@ -4,12 +4,14 @@ import {
 	CCInteger,
 	Color,
 	Component,
+	director,
 	Graphics,
 	instantiate,
 	Mask,
 	Node,
 	Prefab,
 	random,
+	Scene,
 	Sprite,
 	SpriteFrame,
 	tween,
@@ -23,6 +25,8 @@ import { Constants } from "../data/Constants";
 import { AudioManager } from "../manager/AudioManager";
 import { Map } from "../sprites/Map";
 import { Num } from "../sprites/Num";
+import { NumText } from "../sprites/NumText";
+import { Curtain } from "../sprites/Curtain";
 const { ccclass, property } = _decorator;
 
 @ccclass("MainScene")
@@ -31,7 +35,7 @@ export class MainScene extends Component {
 	tankPrefab: Prefab = null;
 
 	@property({ type: Prefab, displayName: "数字预制体" })
-	numPrefab: Prefab = null;
+	numTextPrefab: Prefab = null;
 
 	@property({ displayName: "是否允许播放声音" })
 	isPlayAudio: boolean = false;
@@ -147,11 +151,13 @@ export class MainScene extends Component {
 			Tank.TYPE_ENEMY2_TANK,
 			Tank.TYPE_ENEMY3_TANK,
 		];
+		var randValue = random();
 		var tankType = tankTypes[Math.floor(Math.random() * tankTypes.length)];
 		var bornPosX =
-			random() > 0.5
+			randValue < 0.5
 				? Constants.TileBigSize / 2 - Constants.WarMapSize / 2
-				: Constants.WarMapSize / 2 - Constants.TileBigSize / 2;
+				: randValue < 0.8 ? Constants.WarMapSize / 2 - Constants.TileBigSize / 2 :
+					0;
 		var bornPosY = -Constants.TileBigSize / 2 + Constants.WarMapSize / 2;
 		var tank = Tank.create({
 			prefab: this.tankPrefab,
@@ -165,18 +171,6 @@ export class MainScene extends Component {
 
 	update(deltaTime: number) { }
 
-	/** 英雄坦克死亡 */
-	private onHeroTankDie() {
-		console.log(`MainScene: 英雄坦克被销毁 ${this.heroTankLife}`);
-		this.heroTankLife--;
-		if (this.heroTankLife <= 0) {
-			console.log(`Game Over`);
-			this.showGameOver(); //显示游戏结束
-			return;
-		}
-		this.node.getChildByName("Tanks").addChild(this.createHeroTank()); //生成新的英雄坦克
-	}
-
 	/** 敌方坦克死亡  */
 	private onEnemTankyDie() {
 		console.log(`MainScene: 敌方坦克被销毁`);
@@ -189,6 +183,21 @@ export class MainScene extends Component {
 		this.generateEnemyTank(); //生成新的地方坦克
 		this._enemyMarkerNodes.pop().destroy(); //移除敌方坦克标记
 		console.log("MainScene: 敌方坦克被销毁");
+	}
+
+	/** 英雄坦克死亡 */
+	private onHeroTankDie() {
+		--this.heroTankLife;
+		if (this.heroTankLife <= 0) {
+			this.heroTankLife = 0;
+		}
+		console.log(`MainScene: 英雄坦克被销毁 ${this.heroTankLife}`);
+		this.showHeroLife(); //显示英雄生命值面板
+		if (this.heroTankLife == 0) {
+			this.showGameOver(); //显示游戏结束
+			return;
+		}
+		this.node.getChildByName("Tanks").addChild(this.createHeroTank()); //生成新的英雄坦克
 	}
 
 	/** 英雄基地被销毁 */
@@ -258,37 +267,18 @@ export class MainScene extends Component {
 
 	/** 显示英雄生命面板 */
 	private showHeroLife() {
-		var heroLifeBoardNode = this.node
-			.getChildByName("Information")
-			.getChildByName("Player1Tag");
-		var numNode = Num.createGroup({
-			prefab: this.numPrefab,
-			value: this.heroTankLife,
-			position: new Vec3(10, -10),
-		})
-		heroLifeBoardNode.addChild(numNode.node);
-		var hero2LifeBoardNode = this.node
-			.getChildByName("Information")
-			.getChildByName("Player2Tag");
-		var numNode = Num.createGroup({
-			prefab: this.numPrefab,
-			value: 0,
-			position: new Vec3(10, -10),
-		})
-		hero2LifeBoardNode.addChild(numNode.node);
+		this.node.getChildByName("Information")
+			.getChildByName("Player1Tag")
+			.getChildByName("Player1LifeText")
+			.getComponent(NumText)
+			.setNumber(this.heroTankLife);
 	}
 
 	/** 显示关卡等级 */
 	private showStageLevel() {
-		var stageLevelNode = this.node
-			.getChildByName("Information")
-			.getChildByName("StageFlag");
-		var numNode = Num.createGroup({
-			prefab: this.numPrefab,
-			value: this.stage,
-			position: new Vec3(5, -10),
-		})
-		stageLevelNode.addChild(numNode.node);
+		this.node.getChildByName("Curtain")
+			.getComponent(Curtain)
+			.setStage(this.stage + 1);
 	}
 
 }

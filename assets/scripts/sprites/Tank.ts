@@ -7,17 +7,21 @@ import {
 	CCInteger,
 	CCString,
 	Collider2D,
+	Color,
 	Component,
 	director,
 	ERaycast2DType,
 	EventKeyboard,
 	Input,
 	input,
+	InstanceMaterialType,
 	instantiate,
 	KeyCode,
 	macro,
 	math,
 	Node,
+	PhysicMaterial,
+	PhysicsMaterial,
 	PhysicsSystem2D,
 	Prefab,
 	RigidBody2D,
@@ -112,7 +116,7 @@ export class Tank extends Component {
 	numOfHitReceived: number = 1;
 
 	/** 移动方向 */
-	@property({ type: CCString, displayName: "移动方向(UP|DOWN|LEFT|RIGHT)" })
+	@property({ displayName: "移动方向(UP|DOWN|LEFT|RIGHT)" })
 	direction: String = Direction.UP;
 
 	/** 是否使用Ai自动移动 */
@@ -164,7 +168,13 @@ export class Tank extends Component {
 		}
 	}
 
-	onCollision(selfCollider: Collider2D, otherCollider: Collider2D) { }
+	onCollision(selfCollider: Collider2D, otherCollider: Collider2D) {
+		if (otherCollider.group == CollisionMask.EnemyTank
+			|| otherCollider.group == CollisionMask.HeroTank) {
+			selfCollider.body.linearVelocity = Vec2.ZERO;
+			otherCollider.body.linearVelocity = Vec2.ZERO;
+		}
+	}
 
 	/** 加载精灵帧 */
 	private loadSpriteFrames(tankType: number) {
@@ -194,12 +204,10 @@ export class Tank extends Component {
 				position: [index * Constants.TileBigSize, 0],
 				clipSize: [Constants.TileBigSize, Constants.TileBigSize],
 			});
-			if (index == 0) {
-				this.node.getComponent(Sprite).spriteFrame = spriteFrame;
-			}
 			this._spriteFrames.set(dir, spriteFrame);
 			console.log("Message: Loaded SpriteFrame ", index, dir); // 输出加载成功的精灵帧
 		}
+		this.setSpriteFrameByDirection(this.direction);
 		this.node
 			.getComponent(UITransform)
 			.setContentSize(Constants.TileBigSize, Constants.TileBigSize);
@@ -215,12 +223,17 @@ export class Tank extends Component {
 	/** 受伤 */
 	hurt() {
 		if (this.tankState == TankState.PROTECTED) {
-			console.log("保护状态，无法受伤");
+			console.log("英雄保护状态，无法受伤");
 			return;
 		}
-		--this.numOfHitReceived; //抗打能力减少，为0时，直接销毁
-		if (this.numOfHitReceived <= 0) {
+		if (--this.numOfHitReceived <= 0) {
+			if (this.tankState == TankState.DEAD) {
+				console.log("英雄已经死亡，无法受伤");
+				return;
+			}
 			this.tankState = TankState.DEAD;
+			this.node.getComponent(BoxCollider2D).enabled = false;
+			this.node.getComponent(RigidBody2D).linearVelocity = Vec2.ZERO;
 			this.scheduleOnce(this.bombThenDestroy, 0); // 爆炸并销毁
 			return;
 		}
@@ -255,9 +268,12 @@ export class Tank extends Component {
 			return;
 		}
 		if (direction == Direction.NONE) return; // 如果方向为NONE，则不发射子弹
+		var curTimeMillis = Date.now();
+		if (curTimeMillis - this._lastFireTimeMillis < 800) return; // 限制射击频率
+		this._lastFireTimeMillis = curTimeMillis;
 		var bullet = Bullet.create({
-			prefab: this.bulletPrefab,
 			tankAnchor: this.node,
+			prefab: this.bulletPrefab,
 		});
 		this.node.parent.addChild(bullet); //子弹追加到界面中
 		if (!this.useAiMove) AudioManager.Instance.playAttackAudio(); //播放攻击音效
@@ -298,14 +314,14 @@ export class Tank extends Component {
 		sprite.spriteFrame = this._spriteFrames.get(direction);
 	}
 
-	findRouteByRaycast(target: Vec2): Boolean {
-		var raycastResult = PhysicsSystem2D.instance.raycast(
-			this.node.position,
-			target,
-			ERaycast2DType.Closest
-		);
-		return raycastResult.length > 0;
-	}
+	// findRouteByRaycast(target: Vec2): Boolean {
+	// 	var raycastResult = PhysicsSystem2D.instance.raycast(
+	// 		this.node.position,
+	// 		target,
+	// 		ERaycast2DType.Closest
+	// 	);
+	// 	return raycastResult.length > 0;
+	// }
 
 	/** 显示出生时的特效 */
 	private showBornEffect() {
@@ -449,6 +465,10 @@ export class Tank extends Component {
 
 	// 当键盘按下时触发
 	onKeyDown(event: EventKeyboard) {
+		if (this.tankState == TankState.DEAD) {
+			console.log("坦克已死亡，无法移动");
+			return;
+		}
 		if (event.keyCode == KeyCode.KEY_W || event.keyCode == KeyCode.ARROW_UP) {
 			this.playerMove(Direction.UP);
 		} else if (
@@ -505,6 +525,8 @@ export class Tank extends Component {
 
 	/** 注销键盘事件 */
 	unregisterKeyboardEvents() {
+		this.getComponent(RigidBody2D).enabled = false;
+		this.getComponent(BoxCollider2D).enabled = false;
 		input.off(Input.EventType.KEY_UP, this.onKeyUp, this);
 		input.off(Input.EventType.KEY_DOWN, this.onKeyDown, this);
 	}

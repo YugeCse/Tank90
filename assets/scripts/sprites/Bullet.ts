@@ -49,7 +49,7 @@ export class Bullet extends Component {
 	@property({ type: SpriteFrame, displayName: "子弹向右图片" })
 	bulletRightSpriteFrames: SpriteFrame = null;
 
-	@property({ type: CCString, displayName: "子弹方向(UP|DOWN|LEFT|RIGHT)" })
+	@property({ displayName: "子弹方向(UP|DOWN|LEFT|RIGHT)" })
 	direction: String = Direction.NONE;
 
 	@property({ type: CCFloat, displayName: "子弹速度" })
@@ -123,7 +123,7 @@ export class Bullet extends Component {
 	onCollision(selfCollider: Collider2D, otherCollider: Collider2D) {
 		if (otherCollider.group == CollisionMask.WorldBoundary) {
 			selfCollider.enabled = false; // 碰撞到边界，就停止碰撞检测
-			this.bombThenDestroy();
+			this.bombThenDestroy(); //子弹爆炸，并销毁
 		} else if (
 			otherCollider.group == CollisionMask.EnemyBullet ||
 			otherCollider.group == CollisionMask.HeroBullet
@@ -134,7 +134,7 @@ export class Bullet extends Component {
 				if (this.node) this.bombThenDestroy();
 				if (otherCollider.node)
 					otherCollider.node.getComponent(Bullet).bombThenDestroy();
-			});
+			}, 0);
 		} else if (otherCollider.group == CollisionMask.EnemyTank) {
 			this.handleCollisionWithEnemyTank(selfCollider, otherCollider);
 		} else if (otherCollider.group == CollisionMask.HeroTank) {
@@ -155,7 +155,7 @@ export class Bullet extends Component {
 		otherCollider.enabled = false;
 		this.scheduleOnce(() => {
 			if (this.node) this.bombThenDestroy();
-		});
+		}, 0);
 		otherCollider.node?.getComponent(Tank)?.hurt();
 	}
 
@@ -167,7 +167,7 @@ export class Bullet extends Component {
 		selfCollider.enabled = false;
 		this.scheduleOnce(() => {
 			if (this.node) this.bombThenDestroy();
-		});
+		}, 0);
 		otherCollider.node?.getComponent(Tank)?.hurt();
 	}
 
@@ -192,7 +192,7 @@ export class Bullet extends Component {
 			if (canDestroy && otherNode) otherNode.destroy();
 			if (this.node && tiledType != TiledType.RIVER)
 				this.bombThenDestroy();
-		});
+		}, 0);
 	}
 
 	/** 处理与英雄总部发生碰撞 */

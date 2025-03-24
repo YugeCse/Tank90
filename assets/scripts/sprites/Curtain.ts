@@ -1,4 +1,5 @@
-import { _decorator, Animation, CCInteger, Component, Node } from "cc";
+import { _decorator, Animation, CCInteger, Component, Node, Prefab, Vec3 } from "cc";
+import { NumText } from "./NumText";
 const { ccclass, property } = _decorator;
 
 /** 关卡幕布控制类 */
@@ -11,22 +12,15 @@ export class Curtain extends Component {
     this.scheduleOnce(this.openCurtains, 2); //等待2s后打开幕布
   }
 
-  update(deltaTime: number) {}
+  update(deltaTime: number) { }
 
   /** 设置关卡展示 */
   public setStage(stageNum: number) {
     this.stageNum = stageNum;
-    var titleContainerNode = this.getComponent("TitleContainer").node;
-    var titleContainerChildren = titleContainerNode.children;
-    if (titleContainerChildren.length > 1) {
-      for (var i = 0; i < titleContainerChildren.length; i++) {
-        titleContainerNode.removeChild(titleContainerChildren[i]);
-      }
-    }
-    var numTexts = stageNum.toString().split(".")[0];
-    for (var i = 0; i < numTexts.length; i++) {
-        ///TODO：添加动态数字精灵
-    }
+    this.node.getChildByName("TitleContainer")
+      .getChildByName("StageLevelText")
+      .getComponent(NumText)
+      .setNumber(this.stageNum);
   }
 
   /** 打开幕布 */
